@@ -1,4 +1,18 @@
 ﻿(() => {
+  /* ───── sharing gate ───── */
+  const gateScrim = document.getElementById('gateScrim');
+  const gateBtn = document.getElementById('gateAccept');
+  if (gateScrim && gateBtn) {
+    // Check if already accepted this session
+    if (sessionStorage.getItem('gate-accepted')) {
+      gateScrim.classList.add('is-hidden');
+    }
+    gateBtn.addEventListener('click', () => {
+      gateScrim.classList.add('is-hidden');
+      sessionStorage.setItem('gate-accepted', '1');
+    });
+  }
+
   /* ───── chapter data registry ───── */
   const chapters = [
     { id: 'preface', num: 'i', part: '引', title: '开场白', subtitle: '这本书最可怕的不是题目——是如果题目真的说中了。' },
