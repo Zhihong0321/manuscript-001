@@ -1,0 +1,691 @@
+﻿<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>原来我们都在侍奉假神</title>
+<meta name="description" content="写给教牧、传道人、教会领袖的一面镜子" />
+<meta property="og:title" content="原来我们都在侍奉假神" />
+<meta property="og:description" content="写给教牧、传道人、教会领袖的一面镜子" />
+<meta property="og:type" content="book" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-screen-label="ebook" data-current="cover">
+
+<!-- reading progress bar -->
+<div class="progress" id="progress" style="display:none"><div class="bar" id="progressBar"></div></div>
+
+<!-- ════════════════════════════ COVER VIEW ════════════════════════════ -->
+<section class="view is-active" id="view-cover" data-screen-label="01 Cover">
+  <div class="cover">
+    <header class="cover-head">
+      <span>Volume One</span>
+      <span class="cover-mark">M</span>
+    </header>
+
+    <div class="cover-stage">
+      <div class="cover-eyebrow">
+        <span>写给教牧</span>
+        <span class="dot"></span>
+        <span>传道人</span>
+        <span class="dot"></span>
+        <span>教会领袖</span>
+      </div>
+
+      <div>
+        <h1 class="cover-title">
+          <span class="row">原来我们</span>
+          <span class="row">都在<span class="accent">侍奉</span></span>
+          <span class="row">假　神</span>
+        </h1>
+        <div class="cover-rule"></div>
+        <p class="cover-subtitle">一面镜子</p>
+      </div>
+
+      <blockquote class="cover-verse">
+        <span class="ref">— 哥林多前书 3:18</span>
+        人不可自欺。<br/>
+        你们中间若有人在这世界自以为有智慧，<br/>
+        倒不如变作愚拙，好成为有智慧的。
+      </blockquote>
+    </div>
+
+    <div>
+      <div class="cover-cta">
+        <button class="cover-open" data-goto="reader" data-chapter="preface">
+          <span>翻 开 此 书</span>
+          <span class="arrow">→</span>
+        </button>
+        <button class="cover-toc-link" data-goto="toc">查 看 目 录</button>
+      </div>
+      <footer class="cover-foot" style="margin-top:22px">
+        <span>初版　·　2026</span>
+        <span>MMXXVI</span>
+      </footer>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════ TOC VIEW ══════════════════════════════ -->
+<section class="view" id="view-toc" data-screen-label="02 Contents">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <button class="icon-btn" data-goto="cover" aria-label="返回封面">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="crumb">目　录 · CONTENTS</div>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+
+  <div class="toc">
+    <div class="toc-head">
+      <div class="label">CONTENTS</div>
+      <div class="title">目　　录</div>
+      <div class="rule"></div>
+    </div>
+
+    <!-- Front matter -->
+    <div class="toc-part">
+      <div class="toc-part-head">
+        <span class="toc-part-num">— 引 —</span>
+        <span class="toc-part-title">开　场</span>
+      </div>
+      <ul class="toc-list">
+        <li class="toc-item" data-goto="reader" data-chapter="preface">
+          <div class="toc-row">
+            <span class="toc-num">i</span>
+            <span class="toc-name">开场白</span>
+            <span class="toc-page">003</span>
+          </div>
+          <div class="toc-sub">这本书最可怕的不是题目——是如果题目真的说中了。</div>
+        </li>
+        <li class="toc-item" data-goto="reader" data-chapter="opening">
+          <div class="toc-row">
+            <span class="toc-num">ii</span>
+            <span class="toc-name">开场：一个问题，一把钥匙</span>
+            <span class="toc-page">011</span>
+          </div>
+          <div class="toc-sub">是谁给了我们权柄，去决定耶稣可以做什么、不可以做什么？</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Part I -->
+    <div class="toc-part">
+      <div class="toc-part-head">
+        <span class="toc-part-num">— I —</span>
+        <span class="toc-part-title">第一部　我们看见了什么</span>
+      </div>
+      <ul class="toc-list">
+        <li class="toc-item is-current" data-goto="reader" data-chapter="ch1">
+          <div class="toc-row">
+            <span class="toc-num">01</span>
+            <span class="toc-name">教会正在发生什么</span>
+            <span class="toc-page">023</span>
+          </div>
+          <div class="toc-sub">如果神没有失败，那为什么我们建造的东西正在倒塌？</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Part II -->
+    <div class="toc-part">
+      <div class="toc-part-head">
+        <span class="toc-part-num">— II —</span>
+        <span class="toc-part-title">第二部　诊断——敌人在哪里</span>
+      </div>
+      <ul class="toc-list">
+        <li class="toc-item" data-goto="reader" data-chapter="ch2">
+          <div class="toc-row">
+            <span class="toc-num">02</span>
+            <span class="toc-name">给敌人命名——假神</span>
+            <span class="toc-page">047</span>
+          </div>
+          <div class="toc-sub">如果最危险的偶像，不是我们去信别神，而是理性告诉我们，我们有权审判神呢？</div>
+        </li>
+        <li class="toc-item" data-goto="reader" data-chapter="ch3">
+          <div class="toc-row">
+            <span class="toc-num">03</span>
+            <span class="toc-name">这颗种子从哪里来——伊甸园</span>
+            <span class="toc-page">063</span>
+          </div>
+          <div class="toc-sub">"神岂是真说……"——假神与原罪</div>
+        </li>
+        <li class="toc-item" data-goto="reader" data-chapter="ch4">
+          <div class="toc-row">
+            <span class="toc-num">04</span>
+            <span class="toc-name">迷信之母</span>
+            <span class="toc-page">079</span>
+          </div>
+          <div class="toc-sub">最深的迷信不是信得太盲目，而是太盲目相信自己。</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Part III -->
+    <div class="toc-part">
+      <div class="toc-part-head">
+        <span class="toc-part-num">— III —</span>
+        <span class="toc-part-title">第三部　连护教学都可能在服务假神</span>
+      </div>
+      <ul class="toc-list">
+        <li class="toc-item" data-goto="reader" data-chapter="ch5">
+          <div class="toc-row">
+            <span class="toc-num">05</span>
+            <span class="toc-name">假神穿上了学袍</span>
+            <span class="toc-page">097</span>
+          </div>
+          <div class="toc-sub">当我们以为自己是在为神辩护时，我们到底在保护什么？</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Part IV-cont -->
+    <div class="toc-part">
+      <div class="toc-part-head">
+        <span class="toc-part-num">— IV.a —</span>
+        <span class="toc-part-title">第四部（续）　信心的真相</span>
+      </div>
+      <ul class="toc-list">
+        <li class="toc-item" data-goto="reader" data-chapter="ch6">
+          <div class="toc-row">
+            <span class="toc-num">06</span>
+            <span class="toc-name">有一种信，比不信还可怕</span>
+            <span class="toc-page">117</span>
+          </div>
+          <div class="toc-sub">一个人相信神存在，却仍然不让神作主，这到底算什么信？</div>
+        </li>
+        <li class="toc-item" data-goto="reader" data-chapter="ch7">
+          <div class="toc-row">
+            <span class="toc-num">07</span>
+            <span class="toc-name">苦难，祷告被拒绝，漫长等待</span>
+            <span class="toc-page">135</span>
+          </div>
+          <div class="toc-sub">如果你用的不是耶稣牌心脏，你能面对多少次祷告被拒绝？</div>
+        </li>
+        <li class="toc-item" data-goto="reader" data-chapter="ch8">
+          <div class="toc-row">
+            <span class="toc-num">08</span>
+            <span class="toc-name">器皿的自觉——我不主动，祂主动</span>
+            <span class="toc-page">153</span>
+          </div>
+          <div class="toc-sub">当牧者不再替神操心，教会真的会塌吗？</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Part IV main -->
+    <div class="toc-part">
+      <div class="toc-part-head">
+        <span class="toc-part-num">— IV —</span>
+        <span class="toc-part-title">第四部　原型——历史已经给过我们答案</span>
+      </div>
+      <ul class="toc-list">
+        <li class="toc-item" data-goto="reader" data-chapter="ch9">
+          <div class="toc-row">
+            <span class="toc-num">09</span>
+            <span class="toc-name">西奈山，人类第一间巨型教会</span>
+            <span class="toc-page">173</span>
+          </div>
+          <div class="toc-sub">为什么人在真理面前，仍然会选择一头金牛犊？</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Interlude -->
+    <div class="toc-part">
+      <div class="toc-part-head">
+        <span class="toc-part-num">— ✦ —</span>
+        <span class="toc-part-title">番外篇</span>
+      </div>
+      <ul class="toc-list">
+        <li class="toc-item" data-goto="reader" data-chapter="extra">
+          <div class="toc-row">
+            <span class="toc-num">·</span>
+            <span class="toc-name">今晚就要你灵魂，你怎么办？</span>
+            <span class="toc-page">195</span>
+          </div>
+          <div class="toc-sub">濒死体验研究与一个无法回避的结论</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Part V -->
+    <div class="toc-part">
+      <div class="toc-part-head">
+        <span class="toc-part-num">— V —</span>
+        <span class="toc-part-title">第五部　呼召——对教牧领袖说的话</span>
+      </div>
+      <ul class="toc-list">
+        <li class="toc-item" data-goto="reader" data-chapter="ch10">
+          <div class="toc-row">
+            <span class="toc-num">10</span>
+            <span class="toc-name">牧师，教会领袖们，我们也有一个假神</span>
+            <span class="toc-page">213</span>
+          </div>
+          <div class="toc-sub">我们的假神叫做："我的会众"</div>
+        </li>
+        <li class="toc-item" data-goto="reader" data-chapter="ch11">
+          <div class="toc-row">
+            <span class="toc-num">11</span>
+            <span class="toc-name">不要害怕真理得罪人</span>
+            <span class="toc-page">229</span>
+          </div>
+          <div class="toc-sub">当真理得罪人时，我们是在牧养人，还是在替真理道歉？</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Final -->
+    <div class="toc-part">
+      <div class="toc-part-head">
+        <span class="toc-part-num">— 终 —</span>
+        <span class="toc-part-title">终章　建造</span>
+      </div>
+      <ul class="toc-list">
+        <li class="toc-item" data-goto="reader" data-chapter="ch12">
+          <div class="toc-row">
+            <span class="toc-num">12</span>
+            <span class="toc-name">由拆毁为起点的建造</span>
+            <span class="toc-page">247</span>
+          </div>
+          <div class="toc-sub">如果不先打碎假神，我们到底在建造什么？</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Back matter -->
+    <div class="toc-part">
+      <div class="toc-part-head">
+        <span class="toc-part-num">— 附 —</span>
+        <span class="toc-part-title">后记与附录</span>
+      </div>
+      <ul class="toc-list">
+        <li class="toc-item" data-goto="reader" data-chapter="afterword">
+          <div class="toc-row">
+            <span class="toc-num">·</span>
+            <span class="toc-name">后记：给读者的一句话</span>
+            <span class="toc-page">265</span>
+          </div>
+          <div class="toc-sub">当所有论证结束之后，我还敢诚实回答：我到底在侍奉谁吗？</div>
+        </li>
+        <li class="toc-item" data-goto="reader" data-chapter="appendixA">
+          <div class="toc-row">
+            <span class="toc-num">·</span>
+            <span class="toc-name">附录：合书之前，有人替你问了这些问题</span>
+            <span class="toc-page">271</span>
+          </div>
+        </li>
+        <li class="toc-item" data-goto="reader" data-chapter="appendixB">
+          <div class="toc-row">
+            <span class="toc-num">·</span>
+            <span class="toc-name">附录：第一章案例完整版</span>
+            <span class="toc-page">285</span>
+          </div>
+        </li>
+        <li class="toc-item" data-goto="reader" data-chapter="sources">
+          <div class="toc-row">
+            <span class="toc-num">·</span>
+            <span class="toc-name">资料与来源</span>
+            <span class="toc-page">301</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="toc-meta">
+      <span>12 章 · 番外 · 附录</span>
+      <span class="right">约 312 页</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ HIDDEN CHAPTER CONTENT TEMPLATES ════════════════ -->
+<div style="display:none">
+
+<!-- Preface content -->
+<div id="content-preface">
+      <div class="opener">
+        <div class="label">开 场 白</div>
+        <div class="q">这本书最可怕的不是题目。<br/>是如果题目真的说中了。</div>
+      </div>
+
+      <blockquote class="verse">
+        <span class="ref">哥 林 多 前 书 3:18</span>
+        人不可自欺。<br/>
+        你们中间若有人在这世界自以为有智慧，<br/>
+        倒不如变作愚拙，好成为有智慧的。
+      </blockquote>
+
+      <p>这本书只有在一个情况下能为你产生意义。</p>
+
+      <p>就是把它当成一面镜子。</p>
+
+      <p>不是属灵书籍。<br/>不是教会增长摘要。<br/>不是神学讨论。</p>
+
+      <p><strong>必须是一面镜子。</strong><br/>这样看，才会对你有益。</p>
+
+      <figure class="book-img">
+        <img src="image/01_ecce_homo_ciseri.jpg" alt="Antonio Ciseri《Ecce Homo》(c.1871)" loading="lazy" />
+        <figcaption>
+          <span class="tag">PLATE I</span>
+          <span class="cap">Antonio Ciseri《Ecce Homo》(c.1871)</span>
+          <span class="desc">耶稣站在彼拉多面前受审——这就是全书要照出来的那面镜子。</span>
+        </figcaption>
+      </figure>
+
+      <p>多年以来，这本书还没写成以前，我就在内心深处搭建了一面镜子。</p>
+
+      <p>多年观察下来，我发现——即便我如此谨慎（我自认为谨慎），我还是发现了隐藏在内心深处的</p>
+
+      <p class="pullquote">假　神</p>
+
+      <p>原来我也在侍奉假神。</p>
+
+      <h3 class="section">我 的 故 事</h3>
+
+      <p>我不仅是一个在镜子前审视自己灵魂的罪人，我也是一个在时间边缘徘徊的病人。</p>
+
+      <p>在我 35 岁这一年（2019），我确诊了一些不轻的病——心律异常、高血压等指标的波动。</p>
+
+      <p>35 岁，是很多人觉得人生刚刚起步的年纪。也是在这样的年纪，我必须接受一个客观事实：我的时间有多少，不确定。可能很长，可能很短。不过这都不是重点。</p>
+
+      <p>这种生理上的紧迫感，逼着我从那时起就开始学习"数算自己的日子"。</p>
+
+      <p>这种"靠近死亡的觉知"给了我一把极其冷峻的尺子：如果我们有 80 年，这 80 年的得失放在永恒里，占比无限接近于零。既然占比是零，那我们在世上拼命保护的"拥有"、计较的"失去"，到底在永恒里算什么？</p>
+
+      <p>这场病成了我的镜子。它照出了一个真相——<em>凡是时间能带走的，本质上都不存在。</em>耶稣说虫能蛀、贼能偷的，其实就是指"时间"。</p>
+
+      <p>这些年我越来越看清楚一件事——</p>
+
+      <p><strong>不懂数算日子，就是给假神留空间。</strong></p>
+
+      <p>一个人若觉得时间无限，他就会觉得"现在先按自己的方式走，以后再真信"——这是假神最温柔的藉口。我的病每天都在温柔地提醒我：暴毙可以随时发生。这个提醒像一把尺，把我一点一点从假神手里拔出来。</p>
+
+      <p>假神这个课题，一直是圣经最大、最可怕的议题。</p>
+
+      <p><strong>【假神】将贯穿整本书。</strong>在这本书里，假神就是坐在我们生命王座上那个不是神的东西。</p>
+
+      <p>假神能给我们，神不能给的。</p>
+
+      <p>假神甚至能让我去决定——我要信神什么，不信神什么。</p>
+
+      <p>也就是说，真神在我们内心的假神面前，都可以被过滤。</p>
+</div>
+
+<!-- Opening content -->
+<div id="content-opening">
+      <div class="opener">
+        <div class="label">开 篇 提 问</div>
+        <div class="q">是谁给了我们权柄，<br/>去决定耶稣可以做什么、不可以做什么？</div>
+      </div>
+
+      <blockquote class="verse">
+        <span class="ref">马 可 福 音 1:41 · Codex Bezae 古拉丁抄本</span>
+        有一个长大麻疯的来求耶稣，向他跪下，说：你若肯，必能叫我洁净了。<br/><br/>
+        <strong>耶稣动怒了，</strong>就伸手摸他，说：<strong>我肯，你洁净了罢。</strong>
+      </blockquote>
+
+      <figure class="book-img">
+        <img src="image/02_codex_bezae.jpg" alt="Codex Bezae (D/05) 抄本页面" loading="lazy" />
+        <figcaption>
+          <span class="tag">PLATE II</span>
+          <span class="cap">Codex Bezae (D/05) 抄本页面</span>
+          <span class="desc">让读者亲眼看见这个古抄本的真实样貌。不是传说，是实物。</span>
+        </figcaption>
+      </figure>
+
+      <p>先把问题说清楚。</p>
+
+      <p>马可福音 1:41 在绝大多数抄本传统里，读作"耶稣动了慈心"（希腊文 <em>σπλαγχνισθείς</em>，moved with compassion）。所以今天多数中文与英文译本都译成"动了怜悯"或"动了慈心"。</p>
+
+      <p>但这节经文确实还有一个刺耳的异文：有抄本读作"耶稣动了怒"（希腊文 <em>ὀργισθείς</em>，moved with anger）。这个读法不是现代人为了制造争议编出来的。它见于西方文本传统的重要见证 Codex Bezae（D/05），并得到若干古拉丁抄本支持。</p>
+
+      <p>这个抄本是否是原文，不是本书的重点。</p>
+
+      <p>但它的出现——以及它刚刚在你内心引爆的那个火花——比"哪个才是原文"这个问题更炸裂。</p>
+
+      <p>你读到"耶稣动怒了，对一个病人"，那一霎那，耶稣在你心里，是站在犯人栏里，接受你的审判。</p>
+
+      <p><em>"耶稣怎么可以对一个病人动怒呢？"</em></p>
+
+      <p>换句话说——<strong>Jesus, this is impossible for You.</strong></p>
+
+      <p>这就是这本书从第一页到最后一页要照出来的那面镜子。</p>
+
+      <p class="pullquote">我们心里有一个法官，在审判耶稣可以做什么、不可以做什么。这本书走到最后，只有一个出口——把那个法官的位置，还给祂。</p>
+
+      <p>想一想。一个你平常敬重的人，你认识他脾气温和。这样的人突然动怒，即使你看不明白，你也会相信：肯定有什么特殊情况。</p>
+
+      <p>怎么？为何耶稣动怒，在你心里就直接扣分了？</p>
+
+      <p>耶稣就算动怒，也不影响救恩的约定，不影响福音的根基。但我们的第一反应，不是敬畏，是审判。</p>
+
+      <p><strong>这只是开胃菜。</strong></p>
+
+      <p>本书会有很多这样的时刻——耶稣，甚至上帝，再一次被押解到彼拉多面前，接受我们的审判。</p>
+
+      <p>我不是在亵渎上帝。我是在揭开一件我们长久以来一直在做、却从未承认的事——</p>
+
+      <p><strong>我们在审判耶稣。</strong></p>
+
+      <p>称赞祂，当祂说得好。<br/>审判祂，当祂做得不合我们的标准。</p>
+
+      <p>在耶稣面前，我们行使了一种权力——选择我们可以接受的耶稣，过滤掉我们不能接受的耶稣。</p>
+
+      <p class="pullquote">这种权力，从哪里来？</p>
+</div>
+
+<!-- Chapter 1 content -->
+<div id="content-ch1">
+      <div class="opener">
+        <div class="label">开 篇 提 问</div>
+        <div class="q">如果神没有失败，<br/>那为什么我们建造的东西正在倒塌？</div>
+      </div>
+
+      <blockquote class="verse">
+        <span class="ref">锚 点 经 文 · 希 伯 来 书 11:6</span>
+        人非有信，就不能得神的喜悦；因为到神面前来的人必须信有神，且信他赏赐那寻求他的人。
+      </blockquote>
+
+      <p class="lead"><em>问题从来不是人信不信，而是人最终信谁。</em></p>
+
+      <h3 class="section">现 象</h3>
+
+      <p>以下现象，不加评论，只陈述：</p>
+
+      <ul class="bullets">
+        <li>全球巨型教会与巨型倒塌</li>
+        <li>知名牧师的跌倒与教会崩塌</li>
+        <li>无聊的教会，坐着等死</li>
+        <li>年轻人离开教会，不回头</li>
+        <li>大教会在萎缩，小教会在消失</li>
+        <li>东西方教会，症状不同，方向相同</li>
+      </ul>
+
+      <h4 class="sub">公开案例的前车之鉴</h4>
+
+      <p><strong>先把姿态说清楚——</strong>我们接下来谈几间大教会的案例，并非因为"大教会问题多"，而是因为它们的调查公开透明，有独立报告与法庭文件可供公共检视。小教会的问题不一定少，只是公开度低。</p>
+
+      <p>更重要的是——所有正在成长的教会，最终都会面临组织扩张带来的结构性考验。走在前面的大教会踩到的坑，是我们后面这一批十年二十年后都会遇到的礁石。</p>
+
+      <p>我们看三份已完成独立调查、由第三方出具正式报告的案例。（完整原始报告与细节请见本书附录。）</p>
+
+      <div class="case">
+        <div class="meta">案 例 一　·　北 美</div>
+        <h5>Mars Hill Church<br/><span style="font-weight:400;color:var(--ink-mute);font-size:13px;letter-spacing:0.04em;">西雅图，2014 解散</span></h5>
+        <dl>
+          <dt>规模</dt>
+          <dd>巅峰期 15 间分堂，周出席约 13,000 人。</dd>
+          <dt>核心</dt>
+          <dd>长老会独立审查证实，创办人存在骄傲、专横管理、欺凌同工及财务不透明。跌倒主因不是私德或异端，而是<strong>权力结构失衡与内部问责失效</strong>。<sup class="fnref">[2]</sup></dd>
+          <dt>结局</dt>
+          <dd>调查启动不到五个月，教会系统全面解散。</dd>
+        </dl>
+      </div>
+
+      <div class="case">
+        <div class="meta">案 例 二　·　国 际</div>
+        <h5>RZIM 国际护教机构<br/><span style="font-weight:400;color:var(--ink-mute);font-size:13px;letter-spacing:0.04em;">2021 调查报告</span></h5>
+        <dl>
+          <dt>规模</dt>
+          <dd>跨语种国际知名护教与讲道平台。</dd>
+          <dt>核心</dt>
+          <dd>独立律所调查证实创始人长期性侵犯与属灵操控。机构董事会结构包含亲属与利益相关者，导致内部审查与透明机制被结构性削弱。<sup class="fnref">[4]</sup></dd>
+          <dt>结局</dt>
+          <dd>创始人离世后"人设"崩塌，机构声誉与治理结构遭受根本性冲击。</dd>
+        </dl>
+      </div>
+
+      <div class="case">
+        <div class="meta">案 例 三　·　全 球</div>
+        <h5>Hillsong Church<br/><span style="font-weight:400;color:var(--ink-mute);font-size:13px;letter-spacing:0.04em;">全球，2022 辞任</span></h5>
+        <dl>
+          <dt>规模</dt>
+          <dd>全球 30 城市分堂，周出席约 150,000 人，敬拜音乐影响遍及全球教会。</dd>
+          <dt>核心</dt>
+          <dd>创始人涉嫌隐瞒父亲性侵罪行；董事会另查实其十年间持续违反牧者守则。机构长期以内部机密流程处理，抗拒对会众与公众公开。<sup class="fnref">[3]</sup></dd>
+          <dt>结局</dt>
+          <dd>刑事指控与独立调查迫使创办人辞任全球主任牧师。</dd>
+        </dl>
+      </div>
+
+      <h4 class="sub">底层观察：不是"他们"，是"我们"</h4>
+
+      <p>读过这三份报告，再看独立机构（Barna Group, Lifeway Research, Pew Research）追踪的数据——美国年轻一代离开教会的比例持续攀升，宗教"无归属者"逼近 30%<sup class="fnref">[5]</sup>——我的观察是：</p>
+
+      <p class="pullquote">这些崩塌背后有一个反覆出现的模式：权柄高度集中在一位领袖身上，而这位领袖的"人设"被组织本身精心保护。</p>
+
+      <p>表面是强大的领导力。里面其实是——当领袖需要被问责时，整个组织找不到一个能问责他的位置。</p>
+
+      <p>这不是阴谋。很多时候是善意的。同工觉得"不能让牧师分心"，董事觉得"不能让神的工作蒙羞"。但这种善意的代价是：<strong>一个组织不再有能力对它自己的创办人说"你错了"</strong>。</p>
+
+      <p>当这样的组织越做越大，越来越多的人靠它吃饭、靠它被服事、靠它活出自己的属灵生命——"牧师不能错"这件事，就从一种忠心，变成了一种结构性的防御。</p>
+
+      <p>到这一步，那个组织保护的已经不是福音，是<em>那位牧者的人设</em>。</p>
+
+      <p>而这个人设——用这本书的核心语言——<strong>就是一尊长得像基督的金牛犊</strong>。</p>
+
+      <figure class="book-img">
+        <img src="image/01_ecce_homo_ciseri.jpg" alt="Antonio Ciseri《Ecce Homo》(c.1871)" loading="lazy" />
+        <figcaption>
+          <span class="tag">PLATE I</span>
+          <span class="cap">Antonio Ciseri《Ecce Homo》(c.1871)</span>
+          <span class="desc">耶稣站在彼拉多面前受审——这就是全书要照出来的那面镜子。</span>
+        </figcaption>
+      </figure>
+
+      <p>这尊金牛犊不是某个大教会独家铸造的。<strong>任何一间正在增长的教会，随着人数上去，都可能开始铸造它。</strong>所以走在前面的大教会崩塌时，我们看的不是"他们"，是<em>十年二十年后，我们自己可能正在走向的位置</em>。</p>
+
+      <div class="callout">
+        <span class="tag">编 注</span>
+        以上为基于公开报告与公开统计数据的个人观察。事实层请以各报告原文为准，观察层由作者负责。完整案例细节与数据来源已移至附录，供深入查阅。
+      </div>
+
+      <h3 class="section">迷 信 没 有 减 少</h3>
+
+      <p>照理说，我们活在一个科学空前进步的时代。资讯发达，人工智能免费供全球使用，人类的知识总量每几年就翻一番。按照一般人的想象，迷信应该随着教育普及而消失才对。</p>
+
+      <p>但事实恰恰相反。<strong>迷信没有减少，反而日益严重。</strong></p>
+
+      <p>看看台湾，一些大型邪教团体，教主被信徒封为神，信徒掏出大把大把的钞票供养他。盲目崇拜到令人匪夷所思的地步。再看看美国，一些万人以上的巨型教会，主任牧师坐着私人飞机往来各地。讲台上传讲的早就偏离了圣经的正道，但台下的信徒依然盲目跟随。</p>
+
+      <p>人不是没有知识。<em>人是照样可以相信荒谬。</em></p>
+
+      <p>当人盲目相信错误的对象，结果是毁灭。</p>
+
+      <h4 class="sub">作者的声明（先放下防御）</h4>
+
+      <p>我不是在批评任何牧师、传道、教会领袖，也不是嫉妒巨型教会取得的成就。</p>
+
+      <p>但是——如果很多成功的大教会也会站不住，<strong>不可能是神不给力。一定是我们哪里出了问题。</strong></p>
+
+      <h4 class="sub">教会的回应（全部是症状治疗）</h4>
+
+      <ul class="bullets">
+        <li>换音乐风格</li>
+        <li>改讲道方式</li>
+        <li>建更大建筑</li>
+        <li>做社交媒体</li>
+      </ul>
+
+      <h4 class="sub">没有人敢问的问题</h4>
+
+      <p class="pullquote">我们建造的，到底是什么？</p>
+
+      <p>人数是建造吗？建筑是建造吗？播客粉丝是建造吗？</p>
+
+      <div class="callout">
+        <span class="tag">镜 像 预 告</span>
+        这几幅"从人的眼光看像迷信、从神的眼光看是信心"的画面，将在第六章完整展开。这里先留下一个问题：为什么同样是"信"，有些信把人带向毁灭，有些信却被耶稣称为"你的信救了你"？
+      </div>
+
+      <p>要回答这个问题，我们必须先把敌人找出来。<br/>现象已经摆在眼前；<strong>现在，我们要给它命名。</strong></p>
+</div>
+
+</div><!-- end hidden content templates -->
+
+<!-- ════════════════════════════ READER VIEW ═══════════════════════════ -->
+<section class="view" id="view-reader" data-screen-label="03 Reader">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <button class="icon-btn" data-goto="toc" aria-label="返回目录">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="14" y2="18"/></svg>
+      </button>
+      <div class="crumb">第一章 · 教会正在发生什么</div>
+      <button class="icon-btn" id="btnSettings" aria-label="设置">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h12"/><path d="M4 12h16"/><path d="M4 18h8"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/></svg>
+      </button>
+      <button class="icon-btn" data-goto="cover" aria-label="封面">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h8l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v6h6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <article class="reader">
+    <!-- Content dynamically loaded by JS -->
+  </article>
+</section>
+
+<!-- ──────────────────── settings drawer + scrim ──────────────────────── -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="handle"></div>
+  <h6>阅 读 设 置</h6>
+
+  <div class="row">
+    <span class="label">字 号</span>
+    <div class="seg" id="segFont">
+      <button data-fs="15"><span class="a-sm">字</span></button>
+      <button data-fs="17" class="is-on"><span class="a-md">字</span></button>
+      <button data-fs="19"><span class="a-lg">字</span></button>
+      <button data-fs="22"><span class="a-xl">字</span></button>
+    </div>
+  </div>
+
+  <div class="row">
+    <span class="label">行 距</span>
+    <div class="seg" id="segLine">
+      <button data-lh="1.75">紧凑</button>
+      <button data-lh="2.0" class="is-on">标准</button>
+      <button data-lh="2.3">舒朗</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <span class="label">主 题</span>
+    <div class="theme-swatch" id="segTheme">
+      <button class="sw-day" data-theme="day">日</button>
+      <button class="sw-sepia is-on" data-theme="sepia">纸</button>
+      <button class="sw-night" data-theme="night">夜</button>
+    </div>
+  </div>
+</aside>
+<script src="js/app.js"></script>
+</body>
+</html>
