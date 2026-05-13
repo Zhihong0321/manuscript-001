@@ -1042,3 +1042,40 @@
       2px 3px 16px rgba(0,0,0,0.25),
       0 1px 4px rgba(0,0,0,0.15);
   }
+
+
+  /* ───────────────────────── responsive tables ──────────────────────── */
+  .case table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  @media (max-width: 600px) {
+    .case table.stack-mobile {
+      display: block;
+    }
+    .case table.stack-mobile thead { display: none; }
+    .case table.stack-mobile tr {
+      display: block;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .case table.stack-mobile tr:last-child { border-bottom: 0; }
+    .case table.stack-mobile td {
+      display: block;
+      padding: 4px 0;
+      border: none;
+      font-size: calc(var(--reader-fs) - 2px);
+    }
+    .case table.stack-mobile td::before {
+      content: attr(data-label);
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+  }
