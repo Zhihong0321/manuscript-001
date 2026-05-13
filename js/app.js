@@ -194,4 +194,28 @@
     }
   });
 
+  /* ───── scripture scroll reveal (torn paper appear effect) ───── */
+  const verseObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  function observeVerses() {
+    document.querySelectorAll('blockquote.verse:not(.is-visible)').forEach(el => {
+      verseObserver.observe(el);
+    });
+  }
+
+  // Re-observe after any content change in the reader
+  const readerMO = new MutationObserver(() => {
+    setTimeout(observeVerses, 30);
+  });
+  if (readerArticle) {
+    readerMO.observe(readerArticle, { childList: true, subtree: true });
+  }
+  observeVerses();
+
 })();
