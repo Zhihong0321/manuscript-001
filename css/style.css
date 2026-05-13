@@ -1079,3 +1079,40 @@
       margin-bottom: 2px;
     }
   }
+
+
+  /* ───────────────────────── closing prayer ──────────────────────── */
+  .prayer {
+    margin: 48px 0 36px;
+    padding: 28px 24px;
+    background: color-mix(in oklab, var(--paper) 94%, var(--accent) 4%);
+    border: 1px solid color-mix(in oklab, var(--accent) 25%, transparent);
+    border-radius: 8px;
+    text-align: center;
+  }
+  .prayer-label {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    padding-left: 0.4em;
+  }
+  .prayer-body {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: calc(var(--reader-fs) + 1px);
+    line-height: 2.1;
+    color: var(--ink-soft);
+  }
+  .prayer-body p {
+    margin: 0 0 0.8em;
+    text-align: center;
+  }
+  .prayer-body p:last-child {
+    margin-bottom: 0;
+    font-weight: 500;
+    color: var(--ink);
+    font-style: normal;
+  }
