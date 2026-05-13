@@ -62,8 +62,9 @@
     const tocItem = document.querySelector(`.toc-item[data-chapter="${chapterId}"]`);
     if (tocItem) tocItem.classList.add('is-current');
 
-    // Check if chapter content exists in DOM
-    const chapterContent = document.getElementById('content-' + chapterId);
+    // Check if chapter content exists in DOM (language-aware)
+    const langPrefix = currentLang === 'en' ? 'content-en-' : 'content-';
+    const chapterContent = document.getElementById(langPrefix + chapterId);
     
     // Build chapter header
     const header = `
@@ -194,6 +195,25 @@
     else if (theme === 'day') document.documentElement.setAttribute('data-theme','day');
     else document.documentElement.removeAttribute('data-theme');
   });
+
+  /* ───── language toggle ───── */
+  let currentLang = localStorage.getItem('ebook-lang') || 'zh';
+
+  document.getElementById('segLang').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('#segLang button').forEach(x => x.classList.remove('is-on'));
+    b.classList.add('is-on');
+    currentLang = b.dataset.lang;
+    localStorage.setItem('ebook-lang', currentLang);
+    // Reload current chapter in new language
+    loadChapter(chapters[currentChapterIdx].id);
+  });
+
+  // Restore saved language on load
+  if (currentLang === 'en') {
+    document.querySelectorAll('#segLang button').forEach(x => x.classList.remove('is-on'));
+    document.querySelector('#segLang button[data-lang="en"]').classList.add('is-on');
+  }
 
   /* day theme is in style.css */
 
