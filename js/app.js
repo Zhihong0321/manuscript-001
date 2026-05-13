@@ -200,21 +200,26 @@
   });
 
   /* ───── language toggle ───── */
-
-  document.getElementById('segLang').addEventListener('click', (e) => {
-    const b = e.target.closest('button'); if (!b) return;
-    document.querySelectorAll('#segLang button').forEach(x => x.classList.remove('is-on'));
-    b.classList.add('is-on');
-    currentLang = b.dataset.lang;
-    localStorage.setItem('ebook-lang', currentLang);
-    // Reload current chapter in new language
-    loadChapter(chapters[currentChapterIdx].id);
-  });
+  const segLang = document.getElementById('segLang');
+  if (segLang) {
+    segLang.addEventListener('click', (e) => {
+      const b = e.target.closest('button'); if (!b) return;
+      segLang.querySelectorAll('button').forEach(x => x.classList.remove('is-on'));
+      b.classList.add('is-on');
+      currentLang = b.dataset.lang;
+      localStorage.setItem('ebook-lang', currentLang);
+      // Reload current chapter in new language
+      if (document.body.dataset.current === 'reader') {
+        loadChapter(chapters[currentChapterIdx].id);
+      }
+    });
+  }
 
   // Restore saved language on load
-  if (currentLang === 'en') {
-    document.querySelectorAll('#segLang button').forEach(x => x.classList.remove('is-on'));
-    document.querySelector('#segLang button[data-lang="en"]').classList.add('is-on');
+  if (currentLang === 'en' && segLang) {
+    segLang.querySelectorAll('button').forEach(x => x.classList.remove('is-on'));
+    const enBtn = segLang.querySelector('button[data-lang="en"]');
+    if (enBtn) enBtn.classList.add('is-on');
   }
 
   /* day theme is in style.css */
