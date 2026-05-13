@@ -1,17 +1,26 @@
 ﻿(() => {
-  /* ───── sharing gate ───── */
-  const gateScrim = document.getElementById('gateScrim');
-  const gateBtn = document.getElementById('gateAccept');
-  if (gateScrim && gateBtn) {
-    // Check if already accepted this session
-    if (sessionStorage.getItem('gate-accepted')) {
-      gateScrim.classList.add('is-hidden');
-    }
-    gateBtn.addEventListener('click', () => {
-      gateScrim.classList.add('is-hidden');
-      sessionStorage.setItem('gate-accepted', '1');
-    });
+  /* ───── share modal ───── */
+  const shareScrim = document.getElementById('shareScrim');
+  const shareClose = document.getElementById('shareClose');
+  const shareBtn = document.getElementById('btnShare');
+  const shareWaBtn = document.getElementById('shareWaBtn');
+
+  function openShare() {
+    // Set WhatsApp share URL with current page link
+    const url = window.location.href;
+    const text = encodeURIComponent('推荐你读这本书：《原来我们都在侍奉假神》\n' + url);
+    shareWaBtn.href = 'https://wa.me/?text=' + text;
+    shareScrim.classList.add('is-open');
+    // Close the settings drawer if open
+    closeDrawer();
   }
+  function closeShare() { shareScrim.classList.remove('is-open'); }
+
+  if (shareBtn) shareBtn.addEventListener('click', openShare);
+  if (shareClose) shareClose.addEventListener('click', closeShare);
+  if (shareScrim) shareScrim.addEventListener('click', (e) => {
+    if (e.target === shareScrim) closeShare();
+  });
 
   /* ───── chapter data registry ───── */
   const chapters = [
@@ -152,7 +161,10 @@
 
   /* close drawer on Escape key */
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeDrawer();
+    if (e.key === 'Escape') {
+      if (drawer.classList.contains('is-open')) closeDrawer();
+      if (shareScrim.classList.contains('is-open')) closeShare();
+    }
   });
 
   /* ───── font size ───── */
