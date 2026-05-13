@@ -1,5 +1,8 @@
 ﻿(() => {
 
+  /* ───── language state ───── */
+  let currentLang = localStorage.getItem('ebook-lang') || 'zh';
+
   /* ───── chapter data registry ───── */
   const chapters = [
     { id: 'preface', num: 'i', part: '引', title: '开场白', subtitle: '这本书最可怕的不是题目——是如果题目真的说中了。' },
@@ -197,7 +200,6 @@
   });
 
   /* ───── language toggle ───── */
-  let currentLang = localStorage.getItem('ebook-lang') || 'zh';
 
   document.getElementById('segLang').addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (!b) return;
