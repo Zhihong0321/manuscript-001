@@ -30,6 +30,8 @@
       coverVol: 'Volume One',
       coverAudience: ['写给教牧', '传道人', '教会领袖'],
       coverSubtitle: '一面镜子',
+      coverTitle: ['原来我们', '都在<span class="accent">侍奉</span>', '假　神'],
+      coverVerse: '<span class="ref">— 出埃及记 32:7</span>耶和华对摩西说：<br/>「你下山吧，因为你从埃及地<br/>领出来的百姓已经败坏了。」',
       coverYear: '初版　·　2026',
       backCover: '返回封面',
       backToc: '返回目录',
@@ -62,6 +64,8 @@
       coverVol: 'Volume One',
       coverAudience: ['For pastors', 'preachers', 'church leaders'],
       coverSubtitle: 'A Mirror',
+      coverTitle: ['Are We', 'Actually <span class="accent">Serving</span>', 'a Fake God?'],
+      coverVerse: '<span class="ref">— Exodus 32:7</span>The LORD said to Moses:<br/>"Go down, because your people,<br/>whom you brought up out of Egypt,<br/>have become corrupt."',
       coverYear: 'First Edition · 2026',
       backCover: 'Back to cover',
       backToc: 'Back to contents',
@@ -144,6 +148,23 @@
       eyebrowSpans[1].textContent = aud[1];
       eyebrowSpans[2].textContent = aud[2];
     }
+
+    // Cover title
+    const titleRows = document.querySelectorAll('.cover-title .row');
+    const titleData = t('coverTitle');
+    if (titleRows.length >= 3 && titleData) {
+      titleRows[0].innerHTML = titleData[0];
+      titleRows[1].innerHTML = titleData[1];
+      titleRows[2].innerHTML = titleData[2];
+    }
+
+    // Cover verse
+    const coverVerse = document.querySelector('.cover-verse');
+    if (coverVerse) coverVerse.innerHTML = t('coverVerse');
+
+    // Cover year
+    const coverFoot = document.querySelector('.cover-foot span:first-child');
+    if (coverFoot) coverFoot.textContent = t('coverYear');
 
     // TOC crumb
     const tocCrumb = document.querySelector('#view-toc .crumb');
@@ -377,6 +398,7 @@
       b.classList.add('is-on');
       currentLang = b.dataset.lang;
       localStorage.setItem('ebook-lang', currentLang);
+      updateCoverLangSwap();
       updateUILanguage();
       updateFontButtons();
       // Reload current chapter in new language
@@ -393,8 +415,39 @@
       const enBtn = segLang.querySelector('button[data-lang="en"]');
       if (enBtn) enBtn.classList.add('is-on');
     }
+    updateCoverLangSwap();
     updateUILanguage();
     updateFontButtons();
+  }
+
+  /* ───── cover language swap button ───── */
+  const coverLangSwap = document.getElementById('coverLangSwap');
+  function updateCoverLangSwap() {
+    if (!coverLangSwap) return;
+    const zhSpan = coverLangSwap.querySelector('.lang-zh');
+    const enSpan = coverLangSwap.querySelector('.lang-en');
+    zhSpan.dataset.active = currentLang === 'zh' ? 'true' : 'false';
+    enSpan.dataset.active = currentLang === 'en' ? 'true' : 'false';
+  }
+  if (coverLangSwap) {
+    coverLangSwap.addEventListener('click', () => {
+      currentLang = currentLang === 'zh' ? 'en' : 'zh';
+      localStorage.setItem('ebook-lang', currentLang);
+      // Sync settings drawer toggle
+      if (segLang) {
+        segLang.querySelectorAll('button').forEach(x => x.classList.remove('is-on'));
+        const btn = segLang.querySelector('button[data-lang="' + currentLang + '"]');
+        if (btn) btn.classList.add('is-on');
+      }
+      updateCoverLangSwap();
+      updateUILanguage();
+      updateFontButtons();
+      // Reload chapter if in reader
+      if (document.body.dataset.current === 'reader') {
+        loadChapter(getChapters()[currentChapterIdx].id);
+      }
+    });
+    updateCoverLangSwap();
   }
 
   /* day theme is in style.css */

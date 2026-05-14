@@ -109,6 +109,63 @@
     color: var(--ink-mute);
     text-transform: uppercase;
   }
+
+  /* ── cover language swap button ── */
+  .cover-lang-swap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border: 1.5px solid var(--ink-soft);
+    border-radius: 20px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all .25s ease;
+    background: color-mix(in oklab, var(--paper) 60%, transparent);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .cover-lang-swap:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: scale(1.04);
+  }
+  .cover-lang-swap .lang-divider {
+    color: var(--rule);
+    font-weight: 300;
+  }
+  .cover-lang-swap .lang-zh,
+  .cover-lang-swap .lang-en {
+    transition: color .2s ease, font-weight .2s ease;
+  }
+  .cover-lang-swap .lang-zh[data-active="true"],
+  .cover-lang-swap .lang-en[data-active="true"] {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* English cover title adjustment */
+  html[lang="en"] .cover-title {
+    font-size: clamp(32px, 9vw, 64px);
+    font-family: var(--font-latin);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    line-height: 1.15;
+  }
+  html[lang="en"] .cover-title .accent {
+    font-style: italic;
+  }
+  html[lang="en"] .cover-verse {
+    font-family: var(--font-latin);
+    font-style: italic;
+    line-height: 1.8;
+  }
+  html[lang="en"] .cover-verse .ref {
+    font-style: italic;
+  }
   .cover-foot { margin-top: 8px; }
   .cover-mark {
     width: 22px; height: 22px;
