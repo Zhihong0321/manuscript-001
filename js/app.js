@@ -405,3 +405,182 @@
     });
     updateCoverLangSwap();
   }
+
+
+  /* ───── Keyboard navigation ───── */
+  document.addEventListener('keydown', (e) => {
+    if (document.body.dataset.current !== 'reader') return;
+    if (e.key === 'ArrowLeft' && currentChapterIdx > 0) {
+      go('reader', chapters[currentChapterIdx - 1].id);
+    } else if (e.key === 'ArrowRight' && currentChapterIdx < chapters.length - 1) {
+      go('reader', chapters[currentChapterIdx + 1].id);
+    }
+  });
+
+  /* ───── Scripture scroll reveal ───── */
+  const verseObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('is-visible'); });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  function observeVerses() {
+    document.querySelectorAll('blockquote.verse:not(.is-visible)').forEach(el => verseObserver.observe(el));
+  }
+  if (readerArticle) {
+    new MutationObserver(() => setTimeout(observeVerses, 30)).observe(readerArticle, { childList: true, subtree: true });
+  }
+  observeVerses();
+
+  /* ───── Support page: sharing ───── */
+  const SITE_URL = window.location.origin + window.location.pathname;
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-share]');
+    if (!btn) return;
+    e.preventDefault();
+    const type = btn.dataset.share;
+    const text = currentLang === 'en' ? 'I recommend this book: "All This Time, We\'ve Been Serving a Fake God"\n' : '推荐你读这本书：《原来我们都在侍奉假神》\n';
+    const url = SITE_URL;
+    if (type === 'whatsapp') window.open('https://wa.me/?text=' + encodeURIComponent(text + url), '_blank');
+    else if (type === 'telegram') window.open('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text), '_blank');
+    else if (type === 'copy') {
+      navigator.clipboard.writeText(url).then(() => {
+        btn.textContent = currentLang === 'en' ? '✓ Copied' : '✓ 已复制';
+        setTimeout(() => { btn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> ' + (currentLang === 'en' ? 'Copy Link' : '复制链接'); }, 2000);
+      });
+    }
+  });
+
+  /* ───── Support form: currency + amount ───── */
+  document.addEventListener('click', (e) => {
+    const curBtn = e.target.closest('.support-cur-btn');
+    if (curBtn) { curBtn.closest('.support-currency').querySelectorAll('.support-cur-btn').forEach(b => b.classList.remove('is-on')); curBtn.classList.add('is-on'); return; }
+    const amtBtn = e.target.closest('.support-amt-btn');
+    if (amtBtn) { amtBtn.closest('.support-amounts').querySelectorAll('.support-amt-btn').forEach(b => b.classList.remove('is-on')); amtBtn.classList.add('is-on'); const input = amtBtn.closest('.support-form').querySelector('input[type="number"]'); if (input) input.value = amtBtn.dataset.amt; return; }
+  });
+
+  /* ───── Stripe checkout ───── */
+  document.addEventListener('click', async (e) => {
+    const payBtn = e.target.closest('.support-pay-btn');
+    if (!payBtn) return;
+    e.preventDefault();
+    const form = payBtn.closest('.support-form');
+    const input = form.querySelector('input[type="number"]');
+    const curBtn = form.querySelector('.support-cur-btn.is-on');
+    const amount = parseInt(input.value, 10);
+    const currency = curBtn ? curBtn.dataset.cur : 'myr';
+    if (!amount || amount < 1) { input.style.borderColor = 'var(--accent)'; return; }
+    payBtn.disabled = true; payBtn.textContent = '...';
+    try {
+      const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amount * 100, currency }) });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else throw new Error(data.error || 'Unknown error');
+    } catch (err) {
+      console.error('[Checkout]', err);
+      payBtn.textContent = currentLang === 'en' ? 'Error — try again' : '出错了，请重试';
+      payBtn.disabled = false;
+      setTimeout(() => { payBtn.textContent = currentLang === 'en' ? 'Support This Book' : '支持这本书'; }, 3000);
+    }
+  });
+
+  /* ───── Drawer support link ───── */
+  const drawerSupportLink = document.getElementById('drawerSupportLink');
+  if (drawerSupportLink) {
+    drawerSupportLink.addEventListener('click', (e) => {
+      e.preventDefault(); closeDrawer();
+      setTimeout(() => go('reader', 'support'), 200);
+    });
+  }
+
+  /* ───── Init: load chapters from API then render ───── */
+  async function init() {
+    try {
+      chapters = await fetchChaptersList();
+      renderToc();
+      updateUILanguage();
+      updateFontButtons();
+      // Restore language if saved as EN
+      if (currentLang === 'en') {
+        if (segLang) {
+          segLang.querySelectorAll('button').forEach(x => x.classList.remove('is-on'));
+          const enBtn = segLang.querySelector('button[data-lang="en"]');
+          if (enBtn) enBtn.classList.add('is-on');
+        }
+        updateCoverLangSwap();
+        updateUILanguage();
+      }
+    } catch (err) {
+      console.error('[INIT] Failed to load chapters from API:', err);
+      // Fallback: show error in TOC area
+      const tocBody = document.querySelector('#view-toc .toc-body');
+      if (tocBody) tocBody.innerHTML = '<p style="padding:2rem;color:var(--accent);">无法加载内容。请稍后再试。</p>';
+    }
+  }
+
+  init();
+
+})();
+
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REVIEWS MODULE
+   ═══════════════════════════════════════════════════════════════════════════ */
+(() => {
+  const form = document.getElementById('reviewForm');
+  const list = document.getElementById('reviewsList');
+  const successMsg = document.getElementById('formSuccess');
+  const submitBtn = document.getElementById('reviewSubmitBtn');
+
+  if (!form || !list) return;
+
+  loadReviews();
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const comment = document.getElementById('reviewComment').value.trim();
+    if (!comment) return;
+    submitBtn.disabled = true;
+    submitBtn.textContent = '提交中…';
+    const payload = {
+      name: document.getElementById('reviewName').value.trim() || null,
+      role_church: document.getElementById('reviewRole').value.trim() || null,
+      comment: comment,
+      contact: document.getElementById('reviewContact').value.trim() || null,
+    };
+    try {
+      const res = await fetch('/api/reviews', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (res.ok) {
+        form.reset();
+        successMsg.style.display = 'block';
+        setTimeout(() => { successMsg.style.display = 'none'; }, 4000);
+        loadReviews();
+      } else { throw new Error('Submit failed'); }
+    } catch (err) {
+      console.error('[REVIEW]', err);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '提交回应';
+    }
+  });
+
+  async function loadReviews() {
+    try {
+      const res = await fetch('/api/reviews');
+      const reviews = await res.json();
+      if (!reviews.length) { list.innerHTML = '<p class="reviews-empty">暂无回应。</p>'; return; }
+      list.innerHTML = reviews.map(r => `
+        <div class="review-card">
+          <div class="review-meta">${r.name || '匿名'} ${r.role_church ? '· ' + r.role_church : ''}</div>
+          <div class="review-body">${escapeHtml(r.comment)}</div>
+          <div class="review-date">${new Date(r.created_at).toLocaleDateString('zh-CN')}</div>
+        </div>
+      `).join('');
+    } catch (err) {
+      list.innerHTML = '<p class="reviews-empty">加载失败。</p>';
+    }
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+})();
