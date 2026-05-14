@@ -466,7 +466,13 @@
     const amount = parseInt(input.value, 10);
     const currency = curBtn ? curBtn.dataset.cur : 'myr';
     const minAmount = currency === 'myr' ? 2 : 1;
-    if (!amount || amount < minAmount) { input.style.borderColor = 'var(--accent)'; input.placeholder = currency === 'myr' ? '最少 RM2' : 'Min $1'; return; }
+    if (!amount || amount < minAmount) {
+      input.style.borderColor = 'var(--accent)';
+      payBtn.textContent = currency === 'myr' ? '很抱歉，Stripe Payment 最低支持 RM2 付款' : 'Sorry, minimum payment is $1 USD';
+      payBtn.style.fontSize = '13px';
+      setTimeout(() => { payBtn.textContent = currentLang === 'en' ? 'Support This Book' : '支持这本书'; payBtn.style.fontSize = ''; }, 4000);
+      return;
+    }
     payBtn.disabled = true; payBtn.textContent = '...';
     try {
       const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amount * 100, currency }) });
