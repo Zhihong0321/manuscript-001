@@ -34,6 +34,11 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-changeme}
       API_PORT: 3000
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   # Nginx frontend
   web:

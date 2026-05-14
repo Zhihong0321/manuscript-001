@@ -41,6 +41,17 @@ async function initDB() {
   }
 }
 
+// ─── Health check (verifies DB connection) ───────────────────────────────────
+app.get('/api/health', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT 1');
+    res.json({ status: 'ok', db: 'connected', timestamp: new Date().toISOString() });
+  } catch (err) {
+    console.error('[HEALTH]', err.message);
+    res.status(503).json({ status: 'error', db: 'disconnected', error: err.message });
+  }
+});
+
 // ─── Public: Get all reviews (NEVER expose contact) ──────────────────────────
 app.get('/api/reviews', async (req, res) => {
   try {
