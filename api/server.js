@@ -8,9 +8,11 @@ const app = express();
 const PORT = process.env.API_PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'changeme';
 
-// Stripe: live and demo keys
-const stripeLive = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
-const stripeDemo = process.env.STRIPE_DEMO_KEY ? new Stripe(process.env.STRIPE_DEMO_KEY) : null;
+// Stripe: live and demo keys (don't crash if missing/invalid)
+let stripeLive = null;
+let stripeDemo = null;
+try { if (process.env.STRIPE_SECRET_KEY) stripeLive = new Stripe(process.env.STRIPE_SECRET_KEY); } catch(e) { console.error('[STRIPE] Live key error:', e.message); }
+try { if (process.env.STRIPE_DEMO_KEY) stripeDemo = new Stripe(process.env.STRIPE_DEMO_KEY); } catch(e) { console.error('[STRIPE] Demo key error:', e.message); }
 
 // Default mode: use demo if live key missing
 let stripeMode = stripeLive ? 'live' : 'demo';
