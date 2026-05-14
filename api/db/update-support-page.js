@@ -37,9 +37,8 @@ const zhBody = `
 <div class="support-divider"></div>
 
 <p style="text-align:center;font-size:13px;color:var(--ink-mute);line-height:1.8;">
-不方便线上支付？<br/>
-你也可以通过 WhatsApp 联系作者：<br/>
-<a href="https://wa.me/601121000099" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px;">601121000099</a>
+任何疑问，可联系作者：<br/>
+<a href="https://wa.me/601121000099" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px;">WhatsApp 601121000099</a>
 </p>
 
 <div class="support-divider"></div>
@@ -91,9 +90,8 @@ any amount is an encouragement.
 <div class="support-divider"></div>
 
 <p style="text-align:center;font-size:13px;color:var(--ink-mute);line-height:1.8;">
-Prefer not to pay online?<br/>
-Contact the author via WhatsApp:<br/>
-<a href="https://wa.me/601121000099" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px;">601121000099</a>
+Any questions? Contact the author:<br/>
+<a href="https://wa.me/601121000099" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px;">WhatsApp 601121000099</a>
 </p>
 
 <div class="support-divider"></div>
