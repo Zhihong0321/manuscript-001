@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Admin · Reading Funnel</title>
+<style>
+  :root {
+    --paper: #f4efe6;
+    --ink: #1c1915;
+    --ink-soft: #3a342c;
+    --ink-mute: #6e6557;
+    --rule: #c8bfac;
+    --accent: #7a1f1f;
+    --highlight: #fff3cd;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    margin: 0;
+    padding: 24px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 22px; margin: 0 0 24px; letter-spacing: 0.05em; }
+  .login-box {
+    max-width: 320px;
+    margin: 80px auto;
+    text-align: center;
+  }
+  .login-box input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    font-size: 15px;
+    background: #fff;
+    margin-bottom: 12px;
+  }
+  .login-box button {
+    width: 100%;
+    padding: 10px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .login-box button:hover { opacity: 0.85; }
+  .error { color: var(--accent); font-size: 13px; margin-top: 8px; }
+
+  .admin-panel { max-width: 900px; margin: 0 auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: 14px;
+  }
+  th {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 13px;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--rule);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr.highlight td { background: var(--highlight); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .empty { text-align: center; color: var(--ink-mute); padding: 40px; }
+</style>
+</head>
+<body>
+
+<div class="login-box" id="loginBox">
+  <h1>管理员登录</h1>
+  <input type="password" id="pwdInput" placeholder="输入管理密码" />
+  <button onclick="doLogin()">登录</button>
+  <div class="error" id="loginError" style="display:none"></div>
+</div>
+
+<div class="admin-panel" id="adminPanel" style="display:none">
+  <h1>阅读漏斗 Reading Funnel</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>章节 Chapter</th>
+        <th class="num">读者 Readers</th>
+        <th class="num">流失 Drop-off</th>
+        <th class="num">流失率 Drop %</th>
+      </tr>
+    </thead>
+    <tbody id="funnelBody"></tbody>
+  </table>
+</div>
+
+<script>
+  const CHAPTER_LABELS = {
+    opening: '开场 Opening',
+    chapter_01: '第一章 Ch.1',
+    chapter_02: '第二章 Ch.2',
+    chapter_03: '第三章 Ch.3',
+    chapter_04: '第四章 Ch.4',
+    chapter_05: '第五章 Ch.5',
+    chapter_06: '第六章 Ch.6',
+    chapter_07: '第七章 Ch.7',
+    chapter_08: '第八章 Ch.8',
+    chapter_09: '第九章 Ch.9',
+    bonus: '番外篇 Bonus',
+    chapter_10: '第十章 Ch.10',
+    chapter_11: '第十一章 Ch.11',
+    chapter_12: '第十二章 Ch.12',
+    afterword: '后记 Afterword',
+    payment: '付款 Payment'
+  };
+
+  let adminPassword = '';
+
+  function doLogin() {
+    const pwd = document.getElementById('pwdInput').value.trim();
+    if (!pwd) return;
+    adminPassword = pwd;
+    loadFunnel();
+  }
+
+  document.getElementById('pwdInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  function formatNumber(n) {
+    return n.toLocaleString('en-US');
+  }
+
+  async function loadFunnel() {
+    try {
+      const res = await fetch('/api/admin/reading', {
+        headers: { 'X-Admin-Password': adminPassword }
+      });
+      if (res.status === 401) {
+        document.getElementById('loginError').textContent = '密码错误';
+        document.getElementById('loginError').style.display = 'block';
+        return;
+      }
+      const data = await res.json();
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      renderFunnel(data);
+    } catch (err) {
+      document.getElementById('loginError').textContent = '连接失败';
+      document.getElementById('loginError').style.display = 'block';
+    }
+  }
+
+  function renderFunnel(data) {
+    const tbody = document.getElementById('funnelBody');
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty">暂无数据</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(row => {
+      const label = CHAPTER_LABELS[row.chapter] || row.chapter;
+      const cls = row.highlight ? ' class="highlight"' : '';
+      return `<tr${cls}>
+        <td>${escHtml(label)}</td>
+        <td class="num">${formatNumber(row.readers)}</td>
+        <td class="num">${formatNumber(row.dropoff)}</td>
+        <td class="num">${row.dropoff_pct.toFixed(1)}%</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function escHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+</script>
+</body>
+</html>

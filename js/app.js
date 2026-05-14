@@ -638,3 +638,88 @@
     return d.innerHTML;
   }
 })();
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   READING ANALYTICS MODULE
+   ═══════════════════════════════════════════════════════════════════════════ */
+(() => {
+  const CHAPTER_MAP = {
+    opening: 'opening',
+    ch1: 'chapter_01', ch2: 'chapter_02', ch3: 'chapter_03',
+    ch4: 'chapter_04', ch5: 'chapter_05', ch6: 'chapter_06',
+    ch7: 'chapter_07', ch8: 'chapter_08', ch9: 'chapter_09',
+    extra: 'bonus',
+    ch10: 'chapter_10', ch11: 'chapter_11', ch12: 'chapter_12',
+    afterword: 'afterword',
+    support: 'payment'
+  };
+
+  const UUID_V4_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  function getBrowserId() {
+    const cookies = document.cookie.split(';');
+    for (const c of cookies) {
+      const [name, val] = c.trim().split('=');
+      if (name === 'browser_id' && UUID_V4_RE.test(val)) {
+        return val;
+      }
+    }
+    const id = crypto.randomUUID();
+    const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+    document.cookie = `browser_id=${id}; expires=${expires}; path=/`;
+    return id;
+  }
+
+  const reported = new Set();
+
+  function reportChapter(analyticsId) {
+    if (!analyticsId || reported.has(analyticsId)) return;
+    reported.add(analyticsId);
+    const browserId = getBrowserId();
+    fetch('/api/reading-progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ browser_id: browserId, chapter: analyticsId })
+    }).catch(() => {});
+  }
+
+  // IntersectionObserver for chapter headers
+  let headerObserver = null;
+
+  function createHeaderObserver() {
+    if (headerObserver) headerObserver.disconnect();
+    headerObserver = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          const tocCurrent = document.querySelector('.toc-item.is-current');
+          if (!tocCurrent) continue;
+          const chapterId = tocCurrent.dataset.chapter;
+          const analyticsId = CHAPTER_MAP[chapterId];
+          if (analyticsId) reportChapter(analyticsId);
+        }
+      }
+    }, { threshold: 0.5 });
+    return headerObserver;
+  }
+
+  function observeChapterHeaders() {
+    const observer = createHeaderObserver();
+    const headers = document.querySelectorAll('#view-reader .reader .chapter-header');
+    headers.forEach(h => observer.observe(h));
+  }
+
+  // MutationObserver on reader article to re-attach IntersectionObserver when content changes
+  const readerArticle = document.querySelector('#view-reader .reader');
+  if (readerArticle) {
+    const mo = new MutationObserver(() => {
+      if (document.body.dataset.current === 'reader') {
+        observeChapterHeaders();
+      }
+    });
+    mo.observe(readerArticle, { childList: true });
+  }
+
+  // Initial observation in case reader is already active
+  observeChapterHeaders();
+})();

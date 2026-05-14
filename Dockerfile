@@ -1,18 +1,30 @@
-FROM nginx:alpine
+FROM node:20-alpine
 
-# Remove default nginx config
-RUN rm /etc/nginx/conf.d/default.conf
+# Install nginx
+RUN apk add --no-cache nginx
 
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# ─── API setup ───
+WORKDIR /app
+COPY api/package.json api/package-lock.json* ./
+RUN npm ci --omit=dev
+COPY api/server.js ./
 
-# Copy static files
+# ─── Nginx setup ───
+RUN rm -f /etc/nginx/http.d/default.conf
+COPY nginx.conf /etc/nginx/http.d/default.conf
+
+# ─── Static files ───
+RUN mkdir -p /usr/share/nginx/html
 COPY index.html /usr/share/nginx/html/
 COPY css/ /usr/share/nginx/html/css/
 COPY js/ /usr/share/nginx/html/js/
 COPY image/ /usr/share/nginx/html/image/
 COPY admin/ /usr/share/nginx/html/admin/
 
+# ─── Start script ───
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
 EXPOSE 8080
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/start.sh"]

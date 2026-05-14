@@ -11,11 +11,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // PostgreSQL connection
 const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'ganzhihong',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
+  connectionString: process.env.DATABASE_URL || `postgresql://${process.env.DB_USER || 'postgres'}:${process.env.DB_PASSWORD || 'postgres'}@${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || 5432}/${process.env.DB_NAME || 'ganzhihong'}`,
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
 });
 
 // Middleware
@@ -103,6 +100,37 @@ app.post('/api/reviews', async (req, res) => {
   }
 });
 
+// ─── Public: Record reading progress ─────────────────────────────────────────
+const UUID_V4_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ALLOWED_CHAPTERS = [
+  'opening', 'chapter_01', 'chapter_02', 'chapter_03', 'chapter_04',
+  'chapter_05', 'chapter_06', 'chapter_07', 'chapter_08', 'chapter_09',
+  'bonus', 'chapter_10', 'chapter_11', 'chapter_12', 'afterword', 'payment'
+];
+
+app.post('/api/reading-progress', async (req, res) => {
+  const { browser_id, chapter } = req.body;
+
+  if (!browser_id || !UUID_V4_RE.test(browser_id)) {
+    return res.status(400).json({ error: 'Invalid browser_id' });
+  }
+
+  if (!chapter || !ALLOWED_CHAPTERS.includes(chapter)) {
+    return res.status(400).json({ error: 'Invalid chapter' });
+  }
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO read_progress (browser_id, chapter) VALUES ($1, $2) ON CONFLICT (browser_id, chapter) DO NOTHING',
+      [browser_id, chapter]
+    );
+    res.status(result.rowCount === 1 ? 201 : 200).json({ success: true });
+  } catch (err) {
+    console.error('[POST /api/reading-progress]', err.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // ─── Admin middleware ────────────────────────────────────────────────────────
 function requireAdmin(req, res, next) {
   const password = req.headers['x-admin-password'];
@@ -136,6 +164,62 @@ app.delete('/api/admin/reviews/:id', requireAdmin, async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error('[DELETE /api/admin/reviews]', err.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ─── Admin: Reading analytics funnel ─────────────────────────────────────────
+app.get('/api/admin/reading', requireAdmin, async (req, res) => {
+  const CHAPTER_ORDER = [
+    'opening', 'chapter_01', 'chapter_02', 'chapter_03', 'chapter_04',
+    'chapter_05', 'chapter_06', 'chapter_07', 'chapter_08', 'chapter_09',
+    'bonus', 'chapter_10', 'chapter_11', 'chapter_12', 'afterword', 'payment'
+  ];
+
+  try {
+    const result = await pool.query(
+      'SELECT chapter, COUNT(DISTINCT browser_id) as readers FROM read_progress GROUP BY chapter'
+    );
+
+    // Build a map of chapter -> readers count
+    const readerMap = {};
+    for (const row of result.rows) {
+      readerMap[row.chapter] = parseInt(row.readers, 10);
+    }
+
+    // Build response array in reading order
+    const funnel = [];
+    for (let i = 0; i < CHAPTER_ORDER.length; i++) {
+      const chapter = CHAPTER_ORDER[i];
+      const readers = readerMap[chapter] || 0;
+      let dropoff = 0;
+      let dropoff_pct = 0;
+
+      if (i > 0) {
+        const prevReaders = funnel[i - 1].readers;
+        dropoff = prevReaders - readers;
+        dropoff_pct = prevReaders > 0
+          ? Math.round(((prevReaders - readers) / prevReaders) * 1000) / 10
+          : 0;
+      }
+
+      funnel.push({ chapter, readers, dropoff, dropoff_pct, highlight: false });
+    }
+
+    // Calculate mean drop-off percentage (excluding first chapter which is always 0)
+    const pcts = funnel.slice(1).map(f => f.dropoff_pct);
+    const mean = pcts.length > 0 ? pcts.reduce((a, b) => a + b, 0) / pcts.length : 0;
+
+    // Mark highlights where drop-off % exceeds mean + 10
+    for (let i = 1; i < funnel.length; i++) {
+      if (funnel[i].dropoff_pct > mean + 10) {
+        funnel[i].highlight = true;
+      }
+    }
+
+    res.json(funnel);
+  } catch (err) {
+    console.error('[GET /api/admin/reading]', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
