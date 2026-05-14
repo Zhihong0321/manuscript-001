@@ -317,6 +317,13 @@
           </div>
           <div class="toc-sub">当所有论证结束之后，我还敢诚实回答：我到底在侍奉谁吗？</div>
         </li>
+        <li class="toc-item" data-goto="reader" data-chapter="ack">
+          <div class="toc-row">
+            <span class="toc-num">·</span>
+            <span class="toc-name">致　谢</span>
+            <span class="toc-page">269</span>
+          </div>
+        </li>
         <li class="toc-item" data-goto="reader" data-chapter="appendixA">
           <div class="toc-row">
             <span class="toc-num">·</span>
@@ -345,6 +352,44 @@
       <span>12 章 · 番外 · 附录</span>
       <span class="right">约 312 页</span>
     </div>
+
+    <!-- ═══════════════════ REVIEWS SECTION ═══════════════════ -->
+    <div class="reviews-section" id="reviewsSection">
+      <div class="reviews-head">
+        <div class="label">REVIEWS</div>
+        <div class="title">读 者 回 应</div>
+        <div class="rule"></div>
+      </div>
+
+      <!-- Submission Form -->
+      <form class="review-form" id="reviewForm">
+        <div class="form-group">
+          <label for="reviewName">名字 <span class="optional">（选填）</span></label>
+          <input type="text" id="reviewName" maxlength="100" placeholder="你的名字" />
+        </div>
+        <div class="form-group">
+          <label for="reviewRole">身份 / 教会 <span class="optional">（选填）</span></label>
+          <input type="text" id="reviewRole" maxlength="150" placeholder="例：某某教会牧师" />
+        </div>
+        <div class="form-group">
+          <label for="reviewComment">评语 <span class="required">*</span></label>
+          <textarea id="reviewComment" rows="4" required placeholder="你的回应或评语…"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="reviewContact">联络方式 <span class="optional">（选填）</span></label>
+          <input type="text" id="reviewContact" maxlength="150" placeholder="电话 / WhatsApp / 电邮" />
+          <p class="form-notice">联络方式仅供作者私下联络，绝不会公开显示。</p>
+        </div>
+        <button type="submit" class="form-submit" id="reviewSubmitBtn">提交回应</button>
+        <div class="form-success" id="formSuccess" style="display:none">感谢你的回应。</div>
+      </form>
+
+      <!-- Reviews Display -->
+      <div class="reviews-list" id="reviewsList">
+        <div class="reviews-loading">加载中…</div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -2375,8 +2420,31 @@
 <p class="pullquote">你还在看。</p>
 </div>
 
+<div id="content-ack">
+<p class="pullquote">致　谢</p>
+<p>这本书不是一个人写出来的。它是二十多年信仰路上，许多人浇灌、修剪、陪伴的结果。</p>
 
-<!-- ═══ ENGLISH CONTENT ═══ -->
+<h4 class="sub">马来西亚少年归主协会（MYFC）</h4>
+<p>心跳一百的节目，是我正式接触耶稣的起点。信主之后，也是他们装备了我，让我参与侍奉。</p>
+
+<h4 class="sub">巴罗仁爱堂 · UTM InterVarsity Christian Center</h4>
+<p>家乡和大学时段的教会。在这里学习带领团契，踏出侍奉的第一步。</p>
+
+<h4 class="sub">喜乐福音堂</h4>
+<p>职场迷失三年后，回归的教会。在这里带领青年团契，参与教会除了讲台以外的各种侍奉。</p>
+<p>小教会。却是我学到最多的地方。</p>
+<p>从建堂传道，以及后来的长老——李局正长老身上，我学习到了一种只降服于耶稣的信仰态度。</p>
+<p>感谢李局正长老夫妇，带领我太太信主、洗礼，并完成我们的婚礼。</p>
+
+<h4 class="sub">汝来福音堂</h4>
+<p>换工作地点后，李长老为我选的下一个教会。</p>
+<p>在这里也带领家庭小组。</p>
+<p>很感谢本堂传道让我在讲台上操练。这本书的内容，是多年讲台服侍中，神祝福的积累。</p>
+<p>也从本堂建堂传道钟今旺传道的侍奉心智中，看见呼召门徒、培养门徒、传承门徒对教会的重要性。</p>
+<p>可以看见他孤独地，在整个越来越随性的教会大环境中，坚守向信仰的顺服——而不是被我们顺服的信仰。</p>
+
+<p class="pullquote">感谢耶稣安排这些前人。<br/>也感谢祂给我的羊群。</p>
+</div>
 <div id="content-en-preface">
 <p>The most terrifying thing about this book is not the title.</p>
 <p class="pullquote">It's if the title is right.</p>
@@ -5764,6 +5832,32 @@
 
 <p>May God have mercy on us — who have all along been serving a Fake God.</p>
 <p>May the Lord have mercy on us who thought we could see. Reason, when it is wrong, is more dangerous than superstition. Amen.</p>
+</div>
+
+<div id="content-en-ack">
+<p class="pullquote">Acknowledgments</p>
+<p>This book was not written by one person. It is the fruit of over twenty years on the road of faith — watered, pruned, and accompanied by many.</p>
+
+<h4 class="sub">Malaysia Youth For Christ (MYFC)</h4>
+<p>The <em>Heartbeat 100</em> program was where I first encountered Jesus. After coming to faith, they equipped me and gave me my first taste of serving.</p>
+
+<h4 class="sub">Batu Pahat Grace Church · UTM InterVarsity Christian Center</h4>
+<p>My hometown and university church. Here I learned to lead fellowship — my first steps in ministry.</p>
+
+<h4 class="sub">Joy Gospel Chapel</h4>
+<p>The church I returned to after three lost years in the working world. Here I led youth fellowship and served in every area of church life outside the pulpit.</p>
+<p>A small church. Yet the place where I learned the most.</p>
+<p>From the founding pastor, and later from Elder Lee Kek Cheng, I learned a posture of faith that surrenders only to Jesus.</p>
+<p>I am grateful to Elder Lee and his wife for leading my wife to Christ, baptizing her, and officiating our wedding.</p>
+
+<h4 class="sub">Nilai Gospel Chapel</h4>
+<p>When I changed jobs, Elder Lee chose this as my next church.</p>
+<p>Here I also lead a home group.</p>
+<p>I am deeply grateful to the pastor for giving me the pulpit to practice. The content of this book is the accumulated blessing of years of preaching ministry.</p>
+<p>From the founding pastor, Rev. Chong Kim Wong, I saw the heart of calling disciples, raising disciples, and passing the baton — and how vital that is for the church.</p>
+<p>I watched him stand alone, in an increasingly casual church culture, holding fast to a faith that surrenders to God — rather than a faith that bends to us.</p>
+
+<p class="pullquote">Thank you, Jesus, for placing these forerunners in my path.<br/>And for the flock you entrusted to me.</p>
 </div>
 
 </div><!-- end hidden content templates -->
