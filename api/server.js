@@ -53,13 +53,26 @@ async function initDB() {
 
 // ─── Health check (verifies DB connection) ───────────────────────────────────
 app.get('/api/health', async (req, res) => {
+  const checks = { api: 'ok', db: 'unknown', stripe: 'unknown', timestamp: new Date().toISOString() };
+  
+  // DB check
   try {
-    const result = await pool.query('SELECT 1');
-    res.json({ status: 'ok', db: 'connected', timestamp: new Date().toISOString() });
+    await pool.query('SELECT 1');
+    checks.db = 'connected';
   } catch (err) {
-    console.error('[HEALTH]', err.message);
-    res.status(503).json({ status: 'error', db: 'disconnected', error: err.message });
+    checks.db = 'error: ' + err.message;
   }
+
+  // Stripe check - just verify the key is valid
+  try {
+    const bal = await stripe.balance.retrieve();
+    checks.stripe = 'connected (currency: ' + (bal.available[0]?.currency || 'unknown') + ')';
+  } catch (err) {
+    checks.stripe = 'error: ' + err.message;
+  }
+
+  const allOk = checks.db === 'connected' && checks.stripe.startsWith('connected');
+  res.status(allOk ? 200 : 503).json(checks);
 });
 
 // ─── Public: Get all reviews (NEVER expose contact) ──────────────────────────
@@ -266,8 +279,8 @@ app.post('/api/checkout', async (req, res) => {
 
     res.json({ url: session.url });
   } catch (err) {
-    console.error('[POST /api/checkout]', err.message);
-    res.status(500).json({ error: 'Could not create checkout session' });
+    console.error('[POST /api/checkout]', err.message, err.type, err.code);
+    res.status(500).json({ error: 'Could not create checkout session', detail: err.message, type: err.type || null, code: err.code || null });
   }
 });
 

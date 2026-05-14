@@ -3,151 +3,36 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>System Health</title>
+<title>Health</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; padding: 24px; min-height: 100vh; }
-  h1 { font-size: 18px; font-weight: 500; margin-bottom: 20px; color: #7ee787; }
-  .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
-  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; color: #8b949e; margin-bottom: 10px; }
-  .status { display: flex; align-items: center; gap: 8px; font-size: 14px; }
-  .dot { width: 10px; height: 10px; border-radius: 50%; }
-  .dot.ok { background: #3fb950; }
-  .dot.err { background: #f85149; }
-  .dot.loading { background: #d29922; animation: pulse 1s infinite; }
-  @keyframes pulse { 50% { opacity: 0.4; } }
-  .detail { margin-top: 8px; font-size: 12px; color: #8b949e; font-family: monospace; white-space: pre-wrap; word-break: break-all; }
-  .actions { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
-  .btn { padding: 8px 16px; border: 1px solid #30363d; border-radius: 6px; background: #21262d; color: #e6edf3; font-size: 13px; cursor: pointer; text-decoration: none; }
-  .btn:hover { border-color: #58a6ff; color: #58a6ff; }
-  .section { margin-top: 24px; }
-  .log { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 12px; font-family: monospace; font-size: 12px; color: #8b949e; max-height: 300px; overflow-y: auto; white-space: pre-wrap; }
+  body { font-family: monospace; background: #111; color: #eee; padding: 32px; font-size: 14px; }
+  pre { background: #1a1a1a; border: 1px solid #333; padding: 16px; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; }
+  .ok { color: #4f4; }
+  .err { color: #f44; }
+  a { color: #6cf; }
+  button { margin-top: 12px; padding: 8px 16px; background: #333; color: #eee; border: 1px solid #555; cursor: pointer; font-family: monospace; }
 </style>
 </head>
 <body>
-
-<h1>⚡ System Health Dashboard</h1>
-
-<div class="card" id="cardApi">
-  <h2>API Server</h2>
-  <div class="status"><span class="dot loading" id="dotApi"></span><span id="txtApi">Checking...</span></div>
-  <div class="detail" id="detailApi"></div>
-</div>
-
-<div class="card" id="cardDb">
-  <h2>PostgreSQL Database</h2>
-  <div class="status"><span class="dot loading" id="dotDb"></span><span id="txtDb">Checking...</span></div>
-  <div class="detail" id="detailDb"></div>
-</div>
-
-<div class="card" id="cardStripe">
-  <h2>Stripe</h2>
-  <div class="status"><span class="dot loading" id="dotStripe"></span><span id="txtStripe">Checking...</span></div>
-  <div class="detail" id="detailStripe"></div>
-</div>
-
-<div class="card" id="cardReviews">
-  <h2>Reviews (latest 5)</h2>
-  <div class="detail" id="detailReviews">Loading...</div>
-</div>
-
-<div class="actions">
-  <a class="btn" href="/admin/reviews.html">📝 Manage Reviews</a>
-  <a class="btn" href="/admin/reading.html">📊 Reading Analytics</a>
-  <a class="btn" href="/" target="_blank">📖 View Site</a>
-  <button class="btn" onclick="runChecks()">🔄 Refresh</button>
-</div>
-
-<div class="section">
-  <div class="card">
-    <h2>Environment</h2>
-    <div class="detail" id="detailEnv">Loading...</div>
-  </div>
-</div>
-
+<h2>/api/health</h2>
+<pre id="out">loading...</pre>
+<button onclick="check()">refresh</button>
+<br><br>
+<a href="/admin/reviews.html">reviews</a> · <a href="/">site</a>
 <script>
-async function runChecks() {
-  // API Health
-  const dotApi = document.getElementById('dotApi');
-  const txtApi = document.getElementById('txtApi');
-  const detailApi = document.getElementById('detailApi');
-  dotApi.className = 'dot loading'; txtApi.textContent = 'Checking...';
-
+async function check() {
+  const el = document.getElementById('out');
   try {
     const r = await fetch('/api/health');
     const d = await r.json();
-    if (d.status === 'ok') {
-      dotApi.className = 'dot ok'; txtApi.textContent = 'Connected';
-      detailApi.textContent = JSON.stringify(d, null, 2);
-
-      // DB status from health
-      const dotDb = document.getElementById('dotDb');
-      const txtDb = document.getElementById('txtDb');
-      const detailDb = document.getElementById('detailDb');
-      if (d.db === 'connected') {
-        dotDb.className = 'dot ok'; txtDb.textContent = 'Connected';
-        detailDb.textContent = 'Database is reachable. Timestamp: ' + d.timestamp;
-      } else {
-        dotDb.className = 'dot err'; txtDb.textContent = 'Disconnected';
-        detailDb.textContent = d.error || 'Unknown error';
-      }
-    } else {
-      dotApi.className = 'dot err'; txtApi.textContent = 'Error';
-      detailApi.textContent = JSON.stringify(d, null, 2);
-    }
-  } catch (e) {
-    dotApi.className = 'dot err'; txtApi.textContent = 'Unreachable';
-    detailApi.textContent = e.message;
-    document.getElementById('dotDb').className = 'dot err';
-    document.getElementById('txtDb').textContent = 'Cannot check (API down)';
+    el.innerHTML = JSON.stringify(d, null, 2)
+      .replace(/"connected[^"]*"/g, '<span class="ok">$&</span>')
+      .replace(/"error[^"]*"/g, '<span class="err">$&</span>');
+  } catch(e) {
+    el.innerHTML = '<span class="err">FETCH FAILED: ' + e.message + '</span>';
   }
-
-  // Stripe check (try a minimal call)
-  const dotStripe = document.getElementById('dotStripe');
-  const txtStripe = document.getElementById('txtStripe');
-  const detailStripe = document.getElementById('detailStripe');
-  try {
-    const r = await fetch('/api/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: 100, currency: 'myr' })
-    });
-    const d = await r.json();
-    if (d.url) {
-      dotStripe.className = 'dot ok'; txtStripe.textContent = 'Working';
-      detailStripe.textContent = 'Checkout session created successfully.\nURL: ' + d.url.substring(0, 60) + '...';
-    } else {
-      dotStripe.className = 'dot err'; txtStripe.textContent = 'Error';
-      detailStripe.textContent = JSON.stringify(d, null, 2);
-    }
-  } catch (e) {
-    dotStripe.className = 'dot err'; txtStripe.textContent = 'Failed';
-    detailStripe.textContent = e.message;
-  }
-
-  // Reviews
-  const detailReviews = document.getElementById('detailReviews');
-  try {
-    const r = await fetch('/api/reviews');
-    const d = await r.json();
-    if (Array.isArray(d)) {
-      detailReviews.textContent = d.length === 0 ? 'No reviews yet.' :
-        d.slice(0, 5).map(r => `[${r.created_at?.substring(0,10)}] ${r.name || 'Anonymous'}: ${r.comment?.substring(0,80)}`).join('\n');
-    } else {
-      detailReviews.textContent = JSON.stringify(d);
-    }
-  } catch (e) {
-    detailReviews.textContent = 'Error: ' + e.message;
-  }
-
-  // Env info
-  document.getElementById('detailEnv').textContent =
-    'Page loaded: ' + new Date().toISOString() + '\n' +
-    'User-Agent: ' + navigator.userAgent.substring(0, 80);
 }
-
-runChecks();
+check();
 </script>
-
 </body>
 </html>
