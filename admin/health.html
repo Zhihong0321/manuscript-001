@@ -90,12 +90,14 @@ async function check() {
     el.innerHTML = JSON.stringify(d, null, 2)
       .replace(/"connected[^"]*"/g, '<span class="ok">$&</span>')
       .replace(/"error[^"]*"/g, '<span class="err">$&</span>');
-    // Update mode buttons
-    document.getElementById('btnLive').className = d.stripe_mode === 'live' ? 'active' : '';
-    document.getElementById('btnDemo').className = d.stripe_mode === 'demo' ? 'active' : '';
-    document.getElementById('modeStatus').innerHTML = d.stripe_status.includes('error')
-      ? '<span class="err">' + d.stripe_status + '</span>'
-      : '<span class="ok">' + d.stripe_status + '</span>';
+    if (d.stripe_mode) {
+      document.getElementById('btnLive').className = d.stripe_mode === 'live' ? 'active' : '';
+      document.getElementById('btnDemo').className = d.stripe_mode === 'demo' ? 'active' : '';
+    }
+    const ss = d.stripe_status || '';
+    document.getElementById('modeStatus').innerHTML = ss.includes('error')
+      ? '<span class="err">' + ss + '</span>'
+      : '<span class="ok">' + ss + '</span>';
   } catch(e) { el.innerHTML = '<span class="err">' + e.message + '</span>'; }
 }
 
