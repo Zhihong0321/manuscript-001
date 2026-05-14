@@ -33,6 +33,8 @@ services:
       DB_USER: postgres
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-changeme}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_DEMO_KEY: ${STRIPE_DEMO_KEY:-}
       API_PORT: 3000
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]

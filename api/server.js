@@ -132,6 +132,34 @@ app.get('/api/health', async (req, res) => {
   res.json(checks);
 });
 
+// ─── Checkout test (dry run) ─────────────────────────────────────────────────
+app.get('/api/checkout-test', async (req, res) => {
+  const s = getStripe();
+  if (!s) return res.status(503).json({ error: 'Stripe not configured', mode: stripeMode });
+
+  try {
+    const session = await s.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: [{
+        price_data: {
+          currency: 'myr',
+          product_data: { name: 'Test', description: 'Checkout test' },
+          unit_amount: 100,
+        },
+        quantity: 1,
+      }],
+      success_url: 'https://ganzhihong.com/?thanks=1&session_id={CHECKOUT_SESSION_ID}',
+      cancel_url: 'https://ganzhihong.com/?cancelled=1',
+    });
+    // Immediately expire the test session so it can't be used
+    try { await s.checkout.sessions.expire(session.id); } catch(e) { /* ok */ }
+    res.json({ success: true, session_id: session.id, url_preview: session.url?.slice(0, 60) + '...', mode: stripeMode });
+  } catch (err) {
+    res.json({ success: false, error: err.message, type: err.type, code: err.code, mode: stripeMode });
+  }
+});
+
 // ─── Public: Get table of contents (all chapters with metadata) ──────────────
 app.get('/api/chapters', async (req, res) => {
   const lang = req.query.lang || 'zh';
@@ -263,6 +291,14 @@ app.post('/api/checkout', async (req, res) => {
   if (!amountNum || amountNum < 100) return res.status(400).json({ error: 'Minimum RM1 / $1' });
   if (amountNum > 999900) return res.status(400).json({ error: 'Too large' });
 
+  // Determine base URL from Origin or Referer header (nginx may not forward Origin)
+  const baseUrl = req.headers.origin
+    || (req.headers.referer ? new URL(req.headers.referer).origin : null)
+    || `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}`
+    || 'https://ganzhihong.com';
+
+  console.log('[CHECKOUT] Creating session:', { amountNum, cur, mode: stripeMode, baseUrl });
+
   try {
     const session = await s.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -275,8 +311,8 @@ app.post('/api/checkout', async (req, res) => {
         },
         quantity: 1,
       }],
-      success_url: `${req.headers.origin || 'https://ganzhihong.com'}/?thanks=1&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin || 'https://ganzhihong.com'}/?cancelled=1`,
+      success_url: `${baseUrl}/?thanks=1&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/?cancelled=1`,
     });
 
     // Record payment in DB
@@ -287,6 +323,7 @@ app.post('/api/checkout', async (req, res) => {
 
     res.json({ url: session.url, session_id: session.id, mode: stripeMode });
   } catch (err) {
+    console.error('[CHECKOUT ERROR]', { message: err.message, type: err.type, code: err.code, statusCode: err.statusCode });
     res.status(500).json({ error: err.message, type: err.type, code: err.code });
   }
 });

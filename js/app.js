@@ -470,13 +470,14 @@
     try {
       const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amount * 100, currency }) });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
       if (data.url) window.location.href = data.url;
-      else throw new Error(data.error || 'Unknown error');
+      else throw new Error(data.error || 'No checkout URL returned');
     } catch (err) {
       console.error('[Checkout]', err);
       payBtn.textContent = currentLang === 'en' ? 'Error — try again' : '出错了，请重试';
       payBtn.disabled = false;
-      setTimeout(() => { payBtn.textContent = currentLang === 'en' ? 'Support This Book' : '支持这本书'; }, 3000);
+      setTimeout(() => { payBtn.textContent = currentLang === 'en' ? 'Support This Book' : '支持这本书'; }, 4000);
     }
   });
 
