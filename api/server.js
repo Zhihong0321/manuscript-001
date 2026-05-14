@@ -38,6 +38,17 @@ async function initDB() {
       );
     `);
     console.log('[DB] reviews table ready');
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS read_progress (
+        id SERIAL PRIMARY KEY,
+        browser_id VARCHAR(100) NOT NULL,
+        chapter VARCHAR(100) NOT NULL,
+        reached_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE(browser_id, chapter)
+      );
+    `);
+    console.log('[DB] read_progress table ready');
   } finally {
     client.release();
   }
