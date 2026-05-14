@@ -9,7 +9,7 @@ COPY api/package.json ./
 RUN npm install --omit=dev
 COPY api/server.js ./
 
-# ─── Nginx setup ───
+# ─── Nginx setup (bust cache v2) ───
 RUN rm -f /etc/nginx/http.d/default.conf
 COPY nginx.conf /etc/nginx/http.d/default.conf
 
