@@ -516,6 +516,189 @@
     }
   }
 
+  /* ───── Payment receipt & status engine ───── */
+  function handlePaymentReturn() {
+    const params = new URLSearchParams(window.location.search);
+    const thanks = params.get('thanks');
+    const sessionId = params.get('session_id');
+    const cancelled = params.get('cancelled');
+
+    // Clean URL without reload
+    if (thanks || cancelled || sessionId) {
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+    }
+
+    if (cancelled === '1') {
+      // User cancelled — do nothing special, just stay on cover
+      return;
+    }
+
+    if (thanks === '1') {
+      showReceipt(sessionId);
+    }
+  }
+
+  async function showReceipt(sessionId) {
+    const scrim = document.getElementById('receiptScrim');
+    const isEn = currentLang === 'en';
+
+    // Set language for receipt
+    updateReceiptLanguage(isEn);
+
+    // Show the receipt overlay immediately
+    setTimeout(() => scrim.classList.add('is-open'), 50);
+
+    // If we have a session ID, fetch real payment data
+    if (sessionId) {
+      await fetchPaymentStatus(sessionId, isEn);
+    } else {
+      // No session ID — show generic success
+      setReceiptGeneric(isEn);
+    }
+  }
+
+  function updateReceiptLanguage(isEn) {
+    const $ = (id) => document.getElementById(id);
+    $('receiptTitle').textContent = isEn ? 'Thank You for Your Support' : '感谢你的支持';
+    $('receiptSubtitle').textContent = isEn ? 'Your contribution has been received' : '你的奉献已确认收到';
+    $('receiptKeyStatus').textContent = isEn ? 'STATUS' : '状态';
+    $('receiptKeyAmount').textContent = isEn ? 'AMOUNT' : '金额';
+    $('receiptKeyDate').textContent = isEn ? 'DATE' : '日期';
+    $('receiptKeyRef').textContent = isEn ? 'REFERENCE' : '参考号';
+    $('receiptMsg1').textContent = isEn ? 'May God remember your generosity.' : '愿神纪念你的慷慨。';
+    $('receiptMsg2').textContent = isEn ? 'May this book bless many more.' : '愿这本书能祝福更多人。';
+    $('receiptContinueBtn').textContent = isEn ? 'CONTINUE READING' : '继续阅读';
+  }
+
+  async function fetchPaymentStatus(sessionId, isEn, retryCount) {
+    retryCount = retryCount || 0;
+    const maxRetries = 3;
+    const $ = (id) => document.getElementById(id);
+
+    try {
+      const res = await fetch(`/api/payment-status/${sessionId}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        showReceiptError(isEn, data.status || 'error');
+        return;
+      }
+
+      // Update receipt with real data
+      const statusEl = $('receiptValStatus');
+      const statusLabels = {
+        completed: isEn ? 'Completed' : '已完成',
+        pending: isEn ? 'Processing' : '处理中',
+        expired: isEn ? 'Expired' : '已过期',
+      };
+
+      statusEl.innerHTML = '<span class="receipt-dot"></span> ' + (statusLabels[data.status] || data.status);
+      statusEl.className = 'receipt-val receipt-status';
+      if (data.status === 'pending') statusEl.classList.add('is-pending');
+      if (data.status === 'expired') statusEl.classList.add('is-failed');
+
+      // Amount
+      const currencySymbols = { myr: 'RM', usd: 'USD ' };
+      const symbol = currencySymbols[data.currency] || data.currency.toUpperCase() + ' ';
+      $('receiptValAmount').textContent = symbol + (data.amount_cents / 100).toFixed(2);
+
+      // Date
+      const date = new Date(data.completed_at || data.created_at);
+      $('receiptValDate').textContent = date.toLocaleDateString(isEn ? 'en-US' : 'zh-CN', {
+        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+
+      // Reference
+      $('receiptValRef').textContent = sessionId.slice(0, 20) + '…';
+
+      // Mode badge
+      if (data.mode === 'demo') {
+        $('receiptRowMode').style.display = 'flex';
+        $('receiptValMode').textContent = 'DEMO / TEST';
+      }
+
+      // If pending, auto-retry after delay
+      if (data.status === 'pending' && retryCount < maxRetries) {
+        $('receiptSubtitle').textContent = isEn ? 'Verifying payment…' : '正在确认付款…';
+        setTimeout(() => fetchPaymentStatus(sessionId, isEn, retryCount + 1), 3000);
+      } else if (data.status === 'pending' && retryCount >= maxRetries) {
+        // Still pending after retries — show pending message
+        $('receiptSubtitle').textContent = isEn
+          ? 'Payment is being processed. It may take a moment.'
+          : '付款正在处理中，可能需要一些时间。';
+      }
+
+    } catch (err) {
+      console.error('[RECEIPT]', err);
+      // Network error — show generic success (payment likely went through)
+      if (retryCount < maxRetries) {
+        setTimeout(() => fetchPaymentStatus(sessionId, isEn, retryCount + 1), 2000);
+      } else {
+        setReceiptGeneric(isEn);
+      }
+    }
+  }
+
+  function setReceiptGeneric(isEn) {
+    const $ = (id) => document.getElementById(id);
+    $('receiptValStatus').innerHTML = '<span class="receipt-dot"></span> ' + (isEn ? 'Received' : '已收到');
+    $('receiptValAmount').textContent = '—';
+    $('receiptValDate').textContent = new Date().toLocaleDateString(isEn ? 'en-US' : 'zh-CN', {
+      year: 'numeric', month: 'short', day: 'numeric'
+    });
+    $('receiptValRef').textContent = '—';
+  }
+
+  function showReceiptError(isEn, status) {
+    const $ = (id) => document.getElementById(id);
+    // Hide normal body, show error
+    document.querySelector('.receipt-header').style.display = 'none';
+    document.querySelector('.receipt-body').style.display = 'none';
+    document.querySelector('.receipt-message').style.display = 'none';
+    document.querySelector('.receipt-footer').style.display = 'none';
+    $('receiptError').style.display = 'block';
+
+    if (status === 'expired') {
+      $('receiptErrorTitle').textContent = isEn ? 'Payment Expired' : '付款已过期';
+      $('receiptErrorMsg').textContent = isEn
+        ? 'This payment session has expired. Please try again if you wish to support.'
+        : '此付款已过期。如果你仍想支持，请重新操作。';
+    } else if (status === 'not_found') {
+      $('receiptErrorTitle').textContent = isEn ? 'Payment Not Found' : '找不到付款记录';
+      $('receiptErrorMsg').textContent = isEn
+        ? 'We could not find this payment. If you believe this is an error, please contact us.'
+        : '找不到此付款记录。如果你认为这是错误，请联系我们。';
+    } else {
+      $('receiptErrorTitle').textContent = isEn ? 'Processing' : '处理中';
+      $('receiptErrorMsg').textContent = isEn
+        ? 'Your payment is being processed. Please refresh in a moment.'
+        : '你的付款正在处理中，请稍后刷新。';
+    }
+
+    $('receiptRetryBtn').textContent = isEn ? 'Refresh Status' : '刷新状态';
+  }
+
+  // Receipt close & continue
+  const receiptScrim = document.getElementById('receiptScrim');
+  const receiptClose = document.getElementById('receiptClose');
+  const receiptContinueBtn = document.getElementById('receiptContinueBtn');
+  const receiptRetryBtn = document.getElementById('receiptRetryBtn');
+
+  function closeReceipt() {
+    receiptScrim.classList.remove('is-open');
+  }
+
+  if (receiptClose) receiptClose.addEventListener('click', closeReceipt);
+  if (receiptContinueBtn) receiptContinueBtn.addEventListener('click', closeReceipt);
+  if (receiptScrim) receiptScrim.addEventListener('click', (e) => { if (e.target === receiptScrim) closeReceipt(); });
+  if (receiptRetryBtn) receiptRetryBtn.addEventListener('click', () => {
+    window.location.reload();
+  });
+
+  // Run on page load
+  handlePaymentReturn();
+
   init();
 
 })();

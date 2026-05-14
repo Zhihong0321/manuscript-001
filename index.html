@@ -232,6 +232,75 @@
   </div>
 </aside>
 
+<!-- ──────────────────── payment receipt overlay ──────────────────────── -->
+<div class="receipt-scrim" id="receiptScrim">
+  <div class="receipt-card" id="receiptCard">
+    <button class="receipt-close" id="receiptClose" aria-label="关闭">✕</button>
+
+    <!-- receipt header -->
+    <div class="receipt-header">
+      <div class="receipt-icon">
+        <svg viewBox="0 0 48 48" width="48" height="48" fill="none">
+          <circle cx="24" cy="24" r="23" stroke="var(--accent)" stroke-width="1.5" opacity="0.3"/>
+          <circle cx="24" cy="24" r="18" stroke="var(--accent)" stroke-width="1"/>
+          <path d="M16 24l5 5 11-11" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="receipt-label">PAYMENT RECEIPT</div>
+      <h2 class="receipt-title" id="receiptTitle">感谢你的支持</h2>
+      <p class="receipt-subtitle" id="receiptSubtitle">你的奉献已确认收到</p>
+    </div>
+
+    <!-- receipt body -->
+    <div class="receipt-body">
+      <div class="receipt-divider"></div>
+      <div class="receipt-row">
+        <span class="receipt-key" id="receiptKeyStatus">状态</span>
+        <span class="receipt-val receipt-status" id="receiptValStatus">
+          <span class="receipt-dot"></span> 已完成
+        </span>
+      </div>
+      <div class="receipt-row">
+        <span class="receipt-key" id="receiptKeyAmount">金额</span>
+        <span class="receipt-val receipt-amount" id="receiptValAmount">—</span>
+      </div>
+      <div class="receipt-row">
+        <span class="receipt-key" id="receiptKeyDate">日期</span>
+        <span class="receipt-val" id="receiptValDate">—</span>
+      </div>
+      <div class="receipt-row">
+        <span class="receipt-key" id="receiptKeyRef">参考号</span>
+        <span class="receipt-val receipt-ref" id="receiptValRef">—</span>
+      </div>
+      <div class="receipt-row" id="receiptRowMode" style="display:none;">
+        <span class="receipt-key">模式</span>
+        <span class="receipt-val receipt-mode" id="receiptValMode">DEMO</span>
+      </div>
+      <div class="receipt-divider"></div>
+    </div>
+
+    <!-- receipt message -->
+    <div class="receipt-message">
+      <p id="receiptMsg1">愿神纪念你的慷慨。</p>
+      <p id="receiptMsg2">愿这本书能祝福更多人。</p>
+    </div>
+
+    <!-- receipt footer -->
+    <div class="receipt-footer">
+      <div class="receipt-author">— 颜志鸿 · Gan Zhi Hong</div>
+      <button class="receipt-continue-btn" id="receiptContinueBtn">继续阅读</button>
+    </div>
+
+    <!-- error state (hidden by default) -->
+    <div class="receipt-error" id="receiptError" style="display:none;">
+      <div class="receipt-error-icon">⚠</div>
+      <h3 id="receiptErrorTitle">付款处理中</h3>
+      <p id="receiptErrorMsg">你的付款正在处理中，请稍后刷新页面查看状态。</p>
+      <button class="receipt-retry-btn" id="receiptRetryBtn">刷新状态</button>
+    </div>
+  </div>
+</div>
+
 <!-- ──────────────────── share modal ──────────────────────── -->
 <div class="share-scrim" id="shareScrim">
   <div class="share-modal" id="shareModal">

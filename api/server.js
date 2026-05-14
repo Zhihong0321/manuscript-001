@@ -275,8 +275,8 @@ app.post('/api/checkout', async (req, res) => {
         },
         quantity: 1,
       }],
-      success_url: `${req.headers.origin || 'https://ganzhihong.com'}/?thanks=1`,
-      cancel_url: `${req.headers.origin || 'https://ganzhihong.com'}/`,
+      success_url: `${req.headers.origin || 'https://ganzhihong.com'}/?thanks=1&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.origin || 'https://ganzhihong.com'}/?cancelled=1`,
     });
 
     // Record payment in DB
@@ -307,6 +307,61 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async
   } catch (err) {
     console.error('[WEBHOOK]', err.message);
     res.status(400).json({ error: err.message });
+  }
+});
+
+// ─── Public: Payment status check (for receipt display) ──────────────────────
+app.get('/api/payment-status/:sessionId', async (req, res) => {
+  const { sessionId } = req.params;
+  if (!sessionId || sessionId.length < 10) return res.status(400).json({ error: 'Invalid session' });
+
+  try {
+    // Check DB first
+    const dbResult = await pool.query(
+      'SELECT status, amount_cents, currency, mode, created_at, completed_at FROM payments WHERE stripe_session_id = $1',
+      [sessionId]
+    );
+
+    if (dbResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Payment not found', status: 'not_found' });
+    }
+
+    const payment = dbResult.rows[0];
+
+    // If still pending, try to check with Stripe directly
+    if (payment.status === 'pending') {
+      const s = payment.mode === 'live' ? stripeLive : stripeDemo;
+      if (s) {
+        try {
+          const session = await s.checkout.sessions.retrieve(sessionId);
+          if (session.payment_status === 'paid') {
+            await pool.query(
+              'UPDATE payments SET status = $1, customer_email = $2, completed_at = NOW() WHERE stripe_session_id = $3',
+              ['completed', session.customer_details?.email || null, sessionId]
+            );
+            payment.status = 'completed';
+            payment.completed_at = new Date().toISOString();
+          } else if (session.status === 'expired') {
+            await pool.query("UPDATE payments SET status = 'expired' WHERE stripe_session_id = $1", [sessionId]);
+            payment.status = 'expired';
+          }
+        } catch (e) {
+          // Stripe check failed, return DB status
+          console.error('[PAYMENT STATUS]', e.message);
+        }
+      }
+    }
+
+    res.json({
+      status: payment.status,
+      amount_cents: payment.amount_cents,
+      currency: payment.currency,
+      mode: payment.mode,
+      created_at: payment.created_at,
+      completed_at: payment.completed_at,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message, status: 'error' });
   }
 });
 
