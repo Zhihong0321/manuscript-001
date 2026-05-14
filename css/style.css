@@ -868,6 +868,151 @@
     .cover-eyebrow { margin-bottom: 10px; }
   }
 
+  /* ═══════════════════════════════════════════════════════════════════
+     MOBILE READER REFINEMENTS (both languages)
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* ── adaptive side padding ── */
+  @media (max-width: 480px) {
+    .reader { padding: 8px 18px 80px; }
+    .toc { padding: 24px 18px 60px; }
+  }
+  @media (min-width: 481px) and (max-width: 719px) {
+    .reader { padding: 8px 28px 100px; }
+  }
+
+  /* ── chapter header: tighter on mobile ── */
+  @media (max-width: 480px) {
+    .chapter-header { margin: 24px 0 20px; }
+    .chapter-num { margin-top: 6px; font-size: 20px; }
+    .chapter-title { font-size: clamp(22px, 6vw, 30px); margin-top: 8px; }
+    .chapter-rule { margin: 16px auto 0; }
+  }
+
+  /* ── pullquotes: scale down on narrow screens ── */
+  @media (max-width: 480px) {
+    .pullquote {
+      font-size: calc(var(--reader-fs) + 3px);
+      margin: 28px 0;
+      letter-spacing: 0.03em;
+    }
+    .pullquote::before,
+    .pullquote::after {
+      margin: 14px auto;
+    }
+  }
+
+  /* ── scripture blockquotes: less padding on mobile ── */
+  @media (max-width: 480px) {
+    blockquote.verse {
+      margin: 24px -4px;
+      padding: 22px 18px 18px;
+    }
+    blockquote.verse::before {
+      top: 6px; left: 10px;
+      width: 22px;
+    }
+  }
+
+  /* ── h4.sub headings: tighter indent on mobile ── */
+  @media (max-width: 480px) {
+    .prose h4.sub {
+      padding-left: 10px;
+      margin: 32px 0 12px;
+      font-size: calc(var(--reader-fs) + 1px);
+    }
+    .prose h3.section {
+      margin: 40px 0 20px;
+      font-size: calc(var(--reader-fs) + 3px);
+    }
+    .prose h3.section::before,
+    .prose h3.section::after {
+      width: 16px;
+      margin: 0 10px;
+    }
+  }
+
+  /* ── images: full-bleed on mobile ── */
+  @media (max-width: 480px) {
+    .book-img {
+      margin: 24px -18px;
+    }
+    .book-img img {
+      border-left: none;
+      border-right: none;
+    }
+    .book-img figcaption {
+      padding: 0 18px;
+      margin-top: 10px;
+    }
+  }
+
+  /* ── chapter nav: stack on very small screens ── */
+  @media (max-width: 380px) {
+    .chapter-nav {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .chapter-nav .next { text-align: left; }
+  }
+
+  /* ── opener: tighter on mobile ── */
+  @media (max-width: 480px) {
+    .opener {
+      margin: 0 0 24px;
+      padding: 16px 0 0;
+    }
+    .opener .q {
+      font-size: calc(var(--reader-fs) + 2px);
+      line-height: 1.7;
+    }
+  }
+
+  /* ── callout boxes: tighter on mobile ── */
+  @media (max-width: 480px) {
+    .callout {
+      margin: 24px -4px;
+      padding: 14px 14px 14px 16px;
+    }
+  }
+
+  /* ── signoff: less vertical space ── */
+  @media (max-width: 480px) {
+    .signoff { margin-top: 40px; }
+    .signoff::before { height: 28px; margin-bottom: 14px; }
+    .chapter-nav { margin-top: 40px; }
+  }
+
+  /* ── bullet lists: tighter on mobile ── */
+  @media (max-width: 480px) {
+    ul.bullets li {
+      padding: 6px 0 6px 22px;
+      line-height: 1.8;
+    }
+    ul.bullets li::before {
+      left: 4px;
+    }
+  }
+
+  /* ═══ ENGLISH-SPECIFIC MOBILE REFINEMENTS ═══ */
+  @media (max-width: 480px) {
+    html[lang="en"] .pullquote {
+      font-size: calc(var(--reader-fs) + 2px);
+      line-height: 1.45;
+    }
+    html[lang="en"] .opener .q {
+      font-size: calc(var(--reader-fs) + 1px);
+      line-height: 1.5;
+    }
+    html[lang="en"] ul.bullets li {
+      line-height: 1.6;
+    }
+    html[lang="en"] .chapter-header .chapter-title {
+      font-size: clamp(20px, 5.5vw, 28px);
+      line-height: 1.25;
+    }
+  }
+
   /* hide native scrollbars subtly */
   ::selection { background: color-mix(in oklab, var(--accent) 35%, transparent); color: var(--ink); }
 
@@ -1384,4 +1529,159 @@
   /* ── desktop bump for English ── */
   @media (min-width: 720px) {
     html[lang="en"] { --reader-fs: 19px; }
+  }
+
+
+  /* ═══════════════════════════ REVIEWS SECTION ═══════════════════════════ */
+  .reviews-section {
+    margin-top: 48px;
+    padding-top: 36px;
+    border-top: 1px solid var(--rule);
+  }
+  .reviews-head {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .reviews-head .label {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.5em;
+    color: var(--ink-mute);
+    padding-left: 0.5em;
+  }
+  .reviews-head .title {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 24px;
+    margin-top: 8px;
+    letter-spacing: 0.08em;
+  }
+  .reviews-head .rule {
+    width: 36px; height: 1px; background: var(--accent);
+    margin: 16px auto 0;
+  }
+
+  /* ─── Form ─── */
+  .review-form {
+    max-width: 520px;
+    margin: 0 auto 40px;
+  }
+  .form-group {
+    margin-bottom: 18px;
+  }
+  .form-group label {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  .form-group .optional {
+    font-weight: 400;
+    color: var(--ink-mute);
+    font-size: 11px;
+  }
+  .form-group .required {
+    color: var(--accent);
+  }
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    font-family: var(--font-serif);
+    font-size: 15px;
+    background: color-mix(in oklab, var(--paper) 70%, #fff 30%);
+    color: var(--ink);
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.7;
+  }
+  .form-notice {
+    margin: 6px 0 0;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.02em;
+  }
+  .form-submit {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 4px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .form-submit:hover { opacity: 0.85; }
+  .form-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .form-success {
+    text-align: center;
+    margin-top: 14px;
+    font-family: var(--font-serif);
+    font-size: 15px;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+  }
+
+  /* ─── Reviews List ─── */
+  .reviews-list {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .review-item {
+    padding: 20px 0;
+    border-bottom: 1px dotted var(--rule);
+  }
+  .review-item:last-child { border-bottom: none; }
+  .review-comment {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--ink);
+    white-space: pre-wrap;
+  }
+  .review-meta {
+    margin-top: 10px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--ink-mute);
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+  .review-name {
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+  .review-role {
+    font-style: italic;
+  }
+  .review-role::before { content: "· "; }
+  .review-date::before { content: "— "; }
+  .reviews-loading,
+  .reviews-empty {
+    text-align: center;
+    padding: 30px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--ink-mute);
+    letter-spacing: 0.04em;
   }

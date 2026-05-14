@@ -352,6 +352,22 @@
 
   /* ───── language toggle ───── */
   const segLang = document.getElementById('segLang');
+  const segFont = document.getElementById('segFont');
+  const fontSizes = { zh: [15, 17, 19, 22], en: [16, 18, 20, 23] };
+
+  function updateFontButtons() {
+    const sizes = fontSizes[currentLang] || fontSizes.zh;
+    const buttons = segFont.querySelectorAll('button');
+    buttons.forEach((btn, i) => {
+      if (sizes[i]) btn.dataset.fs = sizes[i];
+    });
+    // Apply current active button's new value
+    const activeBtn = segFont.querySelector('button.is-on');
+    if (activeBtn) {
+      document.documentElement.style.setProperty('--reader-fs', activeBtn.dataset.fs + 'px');
+    }
+  }
+
   if (segLang) {
     segLang.addEventListener('click', (e) => {
       const b = e.target.closest('button'); if (!b) return;
@@ -360,6 +376,7 @@
       currentLang = b.dataset.lang;
       localStorage.setItem('ebook-lang', currentLang);
       updateUILanguage();
+      updateFontButtons();
       // Reload current chapter in new language
       if (document.body.dataset.current === 'reader') {
         loadChapter(getChapters()[currentChapterIdx].id);
@@ -375,6 +392,7 @@
       if (enBtn) enBtn.classList.add('is-on');
     }
     updateUILanguage();
+    updateFontButtons();
   }
 
   /* day theme is in style.css */
@@ -414,4 +432,100 @@
   }
   observeVerses();
 
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REVIEWS MODULE
+   ═══════════════════════════════════════════════════════════════════════════ */
+(() => {
+  const form = document.getElementById('reviewForm');
+  const list = document.getElementById('reviewsList');
+  const successMsg = document.getElementById('formSuccess');
+  const submitBtn = document.getElementById('reviewSubmitBtn');
+
+  if (!form || !list) return;
+
+  // Load reviews on page load
+  loadReviews();
+
+  // Form submission
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const comment = document.getElementById('reviewComment').value.trim();
+    if (!comment) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '提交中…';
+
+    const payload = {
+      name: document.getElementById('reviewName').value.trim() || null,
+      role_church: document.getElementById('reviewRole').value.trim() || null,
+      comment: comment,
+      contact: document.getElementById('reviewContact').value.trim() || null,
+    };
+
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        form.reset();
+        successMsg.style.display = 'block';
+        setTimeout(() => { successMsg.style.display = 'none'; }, 4000);
+        loadReviews();
+      } else {
+        const err = await res.json();
+        alert(err.error || '提交失败，请稍后再试。');
+      }
+    } catch (err) {
+      alert('网络错误，请稍后再试。');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '提交回应';
+    }
+  });
+
+  async function loadReviews() {
+    try {
+      const res = await fetch('/api/reviews');
+      if (!res.ok) throw new Error('Failed');
+      const reviews = await res.json();
+      renderReviews(reviews);
+    } catch (err) {
+      list.innerHTML = '<div class="reviews-empty">暂时无法加载回应。</div>';
+    }
+  }
+
+  function renderReviews(reviews) {
+    if (reviews.length === 0) {
+      list.innerHTML = '<div class="reviews-empty">暂无回应，成为第一位留言的读者。</div>';
+      return;
+    }
+
+    list.innerHTML = reviews.map(r => {
+      const name = escHtml(r.name || '匿名');
+      const role = r.role_church ? `<span class="review-role">${escHtml(r.role_church)}</span>` : '';
+      const date = new Date(r.created_at).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+      return `
+        <div class="review-item">
+          <div class="review-comment">${escHtml(r.comment)}</div>
+          <div class="review-meta">
+            <span class="review-name">${name}</span>
+            ${role}
+            <span class="review-date">${date}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function escHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
 })();
