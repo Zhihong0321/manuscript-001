@@ -735,6 +735,9 @@
     transition: transform .25s ease;
     padding: 18px 22px calc(22px + env(safe-area-inset-bottom));
     max-width: 540px;
+    max-height: 85vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     margin: 0 auto;
     border-top-left-radius: 14px;
     border-top-right-radius: 14px;
