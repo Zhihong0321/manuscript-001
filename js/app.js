@@ -137,6 +137,54 @@
     const nav = buildNav(idx);
     const body = data.body_html || `<p>${t('editingMsg')}</p>`;
     readerArticle.innerHTML = header + '<div class="prose">' + body + '<div class="signoff">' + t('signoff') + '</div>' + nav + '</div>';
+
+    // Translate support page elements if this is the support chapter
+    if (ch.id === 'support') translateSupportPage();
+  }
+
+  function translateSupportPage() {
+    const isEn = currentLang === 'en';
+    const payBtn = readerArticle.querySelector('.support-pay-btn');
+    if (payBtn) payBtn.textContent = isEn ? 'Support This Book' : '支持这本书';
+    const noteEl = readerArticle.querySelector('.support-note');
+    if (noteEl) noteEl.textContent = isEn ? 'Secure payment via Stripe · No registration needed' : '通过 Stripe 安全支付 · 无需注册';
+    const input = readerArticle.querySelector('.support-custom input');
+    if (input) input.placeholder = isEn ? 'Thank you for your support' : '谢谢你的鼓励';
+    const copyBtn = readerArticle.querySelector('[data-share="copy"]');
+    if (copyBtn) {
+      const svg = copyBtn.querySelector('svg');
+      copyBtn.textContent = '';
+      if (svg) copyBtn.appendChild(svg);
+      copyBtn.append(isEn ? ' Copy Link' : ' 复制链接');
+    }
+    // Translate the descriptive paragraphs
+    const pullquote = readerArticle.querySelector('.pullquote');
+    if (pullquote) pullquote.innerHTML = isEn
+      ? 'If this book has moved you,<br/>you can choose to help it reach further.'
+      : '如果这本书曾触动你，<br/>你可以选择支持它继续走下去。';
+    const supportDivider = readerArticle.querySelector('.support-divider');
+    if (supportDivider) {
+      const descP = supportDivider.nextElementSibling;
+      if (descP && descP.tagName === 'P') {
+        descP.innerHTML = isEn
+          ? 'If you\'d like to support the author\'s continued writing,<br/>any amount is an encouragement.'
+          : '如果你愿意支持作者继续写作，<br/>任何金额都是一份鼓励。';
+      }
+    }
+    const shareIntro = readerArticle.querySelector('.support-share');
+    if (shareIntro && shareIntro.previousElementSibling && shareIntro.previousElementSibling.tagName === 'P') {
+      shareIntro.previousElementSibling.innerHTML = isEn
+        ? 'Share this book with someone you know —<br/><strong>sharing this link is the greatest support.</strong>'
+        : '把这本书分享给你认识的人——<br/><strong>转发这个网站链接，就是最大的支持。</strong>';
+    }
+    // Contact paragraph at the bottom
+    const allPs = readerArticle.querySelectorAll('p');
+    const lastP = allPs[allPs.length - 1];
+    if (lastP && lastP.querySelector('a[href*="wa.me"]') && !lastP.classList.contains('support-note')) {
+      lastP.innerHTML = isEn
+        ? 'Any questions? Contact the author:<br/><a href="https://wa.me/601121000099" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px;">WhatsApp 601121000099</a>'
+        : '任何疑问，可联系作者：<br/><a href="https://wa.me/601121000099" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px;">WhatsApp 601121000099</a>';
+    }
   }
 
   function renderChapterPlaceholder(ch, idx) {
