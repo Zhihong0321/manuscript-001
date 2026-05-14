@@ -2,10 +2,12 @@ const express = require('express');
 const { Pool } = require('pg');
 const helmet = require('helmet');
 const cors = require('cors');
+const Stripe = require('stripe');
 
 const app = express();
 const PORT = process.env.API_PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'changeme';
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // PostgreSQL connection
 const pool = new Pool({
@@ -124,6 +126,53 @@ app.delete('/api/admin/reviews/:id', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('[DELETE /api/admin/reviews]', err.message);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ─── Stripe: Create checkout session ─────────────────────────────────────────
+app.post('/api/checkout', async (req, res) => {
+  const { amount, currency } = req.body;
+
+  // Validate
+  const validCurrencies = ['myr', 'usd'];
+  const cur = (currency || 'myr').toLowerCase();
+  if (!validCurrencies.includes(cur)) {
+    return res.status(400).json({ error: 'Invalid currency. Use myr or usd.' });
+  }
+
+  const amountNum = parseInt(amount, 10);
+  if (!amountNum || amountNum < 100) {
+    // Stripe minimum is 100 cents = RM1 / $1
+    return res.status(400).json({ error: 'Minimum amount is 1.00' });
+  }
+
+  if (amountNum > 999900) {
+    return res.status(400).json({ error: 'Amount too large' });
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: [{
+        price_data: {
+          currency: cur,
+          product_data: {
+            name: '支持这本书 · Support This Book',
+            description: '《原来我们都在侍奉假神》— 颜志鸿',
+          },
+          unit_amount: amountNum,
+        },
+        quantity: 1,
+      }],
+      success_url: `${req.headers.origin || 'https://ganzhihong.com'}/?thanks=1`,
+      cancel_url: `${req.headers.origin || 'https://ganzhihong.com'}/`,
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error('[POST /api/checkout]', err.message);
+    res.status(500).json({ error: 'Could not create checkout session' });
   }
 });
 

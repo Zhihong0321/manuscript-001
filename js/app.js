@@ -90,6 +90,7 @@
       { id: 'ch11', num: '11', part: '第五部 · 呼召——对教牧领袖说的话', title: '不要害怕真理得罪人', subtitle: '当真理得罪人时，我们是在牧养人，还是在替真理道歉？' },
       { id: 'ch12', num: '12', part: '终章 · 建造', title: '由拆毁为起点的建造', subtitle: '如果不先打碎假神，我们到底在建造什么？' },
       { id: 'afterword', num: '·', part: '后记', title: '后记：给读者的一句话', subtitle: '当所有论证结束之后，我还敢诚实回答：我到底在侍奉谁吗？' },
+      { id: 'support', num: '·', part: '后记', title: '支持这本书', subtitle: '' },
       { id: 'ack', num: '·', part: '致谢', title: '致　谢', subtitle: '' },
       { id: 'appendixA', num: '·', part: '附录', title: '合书之前，有人替你问了这些问题', subtitle: '' },
       { id: 'appendixB', num: '·', part: '附录', title: '第一章案例完整版', subtitle: '' },
@@ -112,6 +113,7 @@
       { id: 'ch11', num: '11', part: 'Part V · A Call to Leaders', title: 'Do Not Fear Truth Offending People', subtitle: 'When truth offends, are we shepherding — or apologizing for truth?' },
       { id: 'ch12', num: '12', part: 'Final · Building', title: 'Building That Begins With Demolition', subtitle: 'If we don\'t first shatter the Fake God, what exactly are we building?' },
       { id: 'afterword', num: '·', part: 'Afterword', title: 'Afterword: One Word to the Reader', subtitle: 'When all arguments end, do I dare honestly answer: who am I really serving?' },
+      { id: 'support', num: '·', part: 'Support', title: 'Support This Book', subtitle: '' },
       { id: 'ack', num: '·', part: 'Acknowledgments', title: 'Acknowledgments', subtitle: '' },
       { id: 'appendixA', num: '·', part: 'Appendix', title: 'Questions Before You Close This Book', subtitle: '' },
       { id: 'appendixB', num: '·', part: 'Appendix', title: 'Chapter 1 Case Studies (Full)', subtitle: '' },
@@ -433,6 +435,113 @@
     readerMO.observe(readerArticle, { childList: true, subtree: true });
   }
   observeVerses();
+
+  /* ───── support page: sharing + stripe ───── */
+  const SITE_URL = window.location.origin + window.location.pathname;
+  const SHARE_TEXT_ZH = '推荐你读这本书：《原来我们都在侍奉假神》\n';
+  const SHARE_TEXT_EN = 'I recommend this book: "All This Time, We\'ve Been Serving a Fake God"\n';
+
+  // Sharing buttons
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-share]');
+    if (!btn) return;
+    e.preventDefault();
+    const type = btn.dataset.share;
+    const text = currentLang === 'en' ? SHARE_TEXT_EN : SHARE_TEXT_ZH;
+    const url = SITE_URL;
+
+    if (type === 'whatsapp') {
+      window.open('https://wa.me/?text=' + encodeURIComponent(text + url), '_blank');
+    } else if (type === 'telegram') {
+      window.open('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text), '_blank');
+    } else if (type === 'copy') {
+      navigator.clipboard.writeText(url).then(() => {
+        btn.textContent = currentLang === 'en' ? '✓ Copied' : '✓ 已复制';
+        setTimeout(() => { btn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> ' + (currentLang === 'en' ? 'Copy Link' : '复制链接'); }, 2000);
+      });
+    }
+  });
+
+  // Support form: currency + amount selection
+  document.addEventListener('click', (e) => {
+    const curBtn = e.target.closest('.support-cur-btn');
+    if (curBtn) {
+      curBtn.closest('.support-currency').querySelectorAll('.support-cur-btn').forEach(b => b.classList.remove('is-on'));
+      curBtn.classList.add('is-on');
+      return;
+    }
+    const amtBtn = e.target.closest('.support-amt-btn');
+    if (amtBtn) {
+      amtBtn.closest('.support-amounts').querySelectorAll('.support-amt-btn').forEach(b => b.classList.remove('is-on'));
+      amtBtn.classList.add('is-on');
+      // Update input
+      const input = amtBtn.closest('.support-form').querySelector('input[type="number"]');
+      if (input) input.value = amtBtn.dataset.amt;
+      return;
+    }
+  });
+
+  // Stripe checkout
+  document.addEventListener('click', async (e) => {
+    const payBtn = e.target.closest('.support-pay-btn');
+    if (!payBtn) return;
+    e.preventDefault();
+
+    const form = payBtn.closest('.support-form');
+    const input = form.querySelector('input[type="number"]');
+    const curBtn = form.querySelector('.support-cur-btn.is-on');
+    const amount = parseInt(input.value, 10);
+    const currency = curBtn ? curBtn.dataset.cur : 'myr';
+
+    if (!amount || amount < 1) {
+      input.style.borderColor = 'var(--accent)';
+      return;
+    }
+
+    payBtn.disabled = true;
+    payBtn.textContent = '...';
+
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: amount * 100, currency }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Unknown error');
+      }
+    } catch (err) {
+      console.error('[Checkout]', err);
+      payBtn.textContent = currentLang === 'en' ? 'Error — try again' : '出错了，请重试';
+      payBtn.disabled = false;
+      setTimeout(() => {
+        payBtn.textContent = currentLang === 'en' ? 'Support This Book' : '支持这本书';
+      }, 3000);
+    }
+  });
+
+  // Drawer support link: close drawer then navigate
+  const drawerSupportLink = document.getElementById('drawerSupportLink');
+  if (drawerSupportLink) {
+    drawerSupportLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeDrawer();
+      setTimeout(() => go('reader', 'support'), 200);
+    });
+  }
+
+  // Update drawer support link text on language switch
+  function updateSupportLink() {
+    if (drawerSupportLink) {
+      drawerSupportLink.textContent = currentLang === 'en' ? '♡ Want to support this book?' : '♡ 想支持这本书？';
+    }
+  }
+  // Hook into language update
+  const origUpdateUI = updateUILanguage;
+  updateUILanguage = function() { origUpdateUI(); updateSupportLink(); };
 
 })();
 
