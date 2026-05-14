@@ -19,12 +19,12 @@
       theme: '主 题',
       lang: '语 言',
       share: '分享此书',
-      shareTitle: '分 享 守 则',
-      shareBody1: '这份手稿的目的是帮助教会，欢迎你分享给身边有需要的肢体。',
-      shareBody2: '唯一的请求——<strong>请勿公开发布</strong>。公开此手稿将影响未来出版的可能性。',
-      shareRule1: '<strong>欢迎分享：</strong>请直接把链接转发给有需要的人。',
-      shareRule2: '<strong>请勿公开：</strong>请勿发布在社交媒体、博客或任何公共论坛。',
-      shareRule3: '<strong>引述限制：</strong>正式引用请先获得作者书面确认。',
+      shareTitle: '版 权 声 明',
+      shareBody1: '© 2026 颜志鸿 Gan Zhihong. All rights reserved.',
+      shareBody2: '本书内容受版权法保护。未经作者书面授权，不得以任何形式复制、修改、翻译、商业使用或重新出版本书内容。',
+      shareRule1: '但如果你愿意把这本书分享给你认识的人——',
+      shareRule2: '<strong>转发这个网站链接，欢迎。</strong>这是作者的心愿。',
+      shareRule3: '',
       shareWa: '通过 WhatsApp 分享',
       shareContact: '反馈或联系作者：',
       coverVol: 'Volume One',
@@ -51,12 +51,12 @@
       theme: 'Theme',
       lang: 'Lang',
       share: 'Share',
-      shareTitle: 'SHARING GUIDELINES',
-      shareBody1: 'This manuscript is meant to help the church. You are welcome to share it with those who need it.',
-      shareBody2: 'One request — <strong>please do not publish publicly</strong>. Public release will affect future publication.',
-      shareRule1: '<strong>Share freely:</strong> Send this link directly to anyone who needs it.',
-      shareRule2: '<strong>Do not publish:</strong> Do not post on social media, blogs, or public forums.',
-      shareRule3: '<strong>Citation:</strong> Please get written confirmation before quoting formally.',
+      shareTitle: 'COPYRIGHT',
+      shareBody1: '© 2026 颜志鸿 Gan Zhihong. All rights reserved.',
+      shareBody2: 'The content of this book is protected by copyright. No part may be reproduced, modified, translated, used commercially, or republished without written permission from the author.',
+      shareRule1: 'But if you want to share this book with someone you know —',
+      shareRule2: '<strong>Sharing this website link is welcome.</strong> That is the author\'s wish.',
+      shareRule3: '',
       shareWa: 'Share via WhatsApp',
       shareContact: 'Feedback or contact author:',
       coverVol: 'Volume One',
@@ -172,7 +172,7 @@
     const shareRules = document.querySelectorAll('#shareModal .share-rules li');
     if (shareRules[0]) shareRules[0].innerHTML = t('shareRule1');
     if (shareRules[1]) shareRules[1].innerHTML = t('shareRule2');
-    if (shareRules[2]) shareRules[2].innerHTML = t('shareRule3');
+    if (shareRules[2]) { shareRules[2].innerHTML = t('shareRule3'); shareRules[2].style.display = t('shareRule3') ? '' : 'none'; }
     const shareWaBtn = document.getElementById('shareWaBtn');
     if (shareWaBtn) { const svg = shareWaBtn.querySelector('svg'); shareWaBtn.textContent = ''; if(svg) shareWaBtn.appendChild(svg); shareWaBtn.append(' ' + t('shareWa')); }
 
