@@ -847,6 +847,27 @@
     .case dt { padding-top: 0; }
   }
 
+  /* ───── cover mobile fit ───── */
+  @media (max-height: 750px) {
+    .cover { padding: 20px 22px 18px; }
+    .cover-stage { padding: 4px 0; }
+    .cover-eyebrow { margin-bottom: 14px; font-size: 10px; }
+    .cover-title { font-size: clamp(32px, 10vw, 60px); }
+    .cover-rule { height: 32px; margin: 16px auto 14px; }
+    .cover-subtitle { font-size: 12px; }
+    .cover-verse { margin-top: 18px; font-size: 12px; line-height: 1.8; }
+    .cover-verse .ref { font-size: 11px; margin-bottom: 8px; }
+    .cover-cta { margin-top: 16px; gap: 10px; }
+    .cover-open { padding: 14px 18px; font-size: 12px; }
+    .cover-foot { margin-top: 14px; }
+  }
+
+  @media (max-height: 600px) {
+    .cover-verse { display: none; }
+    .cover-rule { height: 24px; margin: 12px auto 10px; }
+    .cover-eyebrow { margin-bottom: 10px; }
+  }
+
   /* hide native scrollbars subtly */
   ::selection { background: color-mix(in oklab, var(--accent) 35%, transparent); color: var(--ink); }
 
