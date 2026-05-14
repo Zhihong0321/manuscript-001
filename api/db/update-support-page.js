@@ -37,7 +37,7 @@ const zhBody = `
 <div class="support-divider"></div>
 
 <p style="text-align:center;font-size:14px;color:var(--ink-soft);line-height:1.9;margin-bottom:8px;">
-如果你愿意支持作者继续写作与出版，<br/>
+如果你愿意支持作者继续写作，<br/>
 任何金额都是一份鼓励。
 </p>
 
