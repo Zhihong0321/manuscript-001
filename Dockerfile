@@ -5,8 +5,8 @@ RUN apk add --no-cache nginx
 
 # ─── API setup ───
 WORKDIR /app
-COPY api/package.json api/package-lock.json* ./
-RUN npm ci --omit=dev
+COPY api/package.json ./
+RUN npm install --omit=dev
 COPY api/server.js ./
 
 # ─── Nginx setup ───

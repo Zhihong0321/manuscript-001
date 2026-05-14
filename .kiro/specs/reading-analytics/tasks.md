@@ -26,25 +26,25 @@ Add anonymous reading funnel tracking: DB table, two API routes, client-side tra
     - Highlight if drop-off % exceeds mean + 10 points
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6_
 
-- [~] 2. Checkpoint
+- [x] 2. Checkpoint
   - Ensure the server starts without errors, ask the user if questions arise.
 
-- [ ] 3. Add reading analytics tracking to frontend
-  - [-] 3.1 Add reading analytics IIFE module to bottom of `ebook/js/app.js`
+- [x] 3. Add reading analytics tracking to frontend
+  - [x] 3.1 Add reading analytics IIFE module to bottom of `ebook/js/app.js`
     - `getBrowserId()`: read/create `browser_id` cookie (UUID v4, 365-day expiry)
     - `reportChapter(chapterId)`: POST to `/api/reading-progress`, skip if already reported this session (Set-based dedup)
     - IntersectionObserver (threshold 0.5) on `.chapter-header` elements, map DOM chapter IDs to analytics IDs via CHAPTER_MAP
     - Fire-and-forget: silently swallow network errors
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [ ] 4. Create admin reading dashboard page
-  - [-] 4.1 Create `ebook/admin/reading.html`
+- [x] 4. Create admin reading dashboard page
+  - [x] 4.1 Create `ebook/admin/reading.html`
     - Same pattern as existing `ebook/admin/reviews.html`: login box, fetch with `X-Admin-Password` header, render table
     - Show chapter name, readers count, drop-off count, drop-off %, highlighted rows for high drop-off
     - Display chapters in reading order, show zeros when no data
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.6_
 
-- [~] 5. Final checkpoint
+- [x] 5. Final checkpoint
   - Ensure all components work together, ask the user if questions arise.
 
 ## Notes
