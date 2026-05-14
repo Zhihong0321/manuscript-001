@@ -63,6 +63,33 @@ async function initDB() {
         completed_at TIMESTAMP
       );
     `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS chapters (
+        id VARCHAR(50) PRIMARY KEY,
+        sort_order INTEGER NOT NULL,
+        chapter_num VARCHAR(10),
+        part_group VARCHAR(100),
+        page_num INTEGER,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS chapter_content (
+        id SERIAL PRIMARY KEY,
+        chapter_id VARCHAR(50) NOT NULL REFERENCES chapters(id) ON DELETE CASCADE,
+        lang VARCHAR(10) NOT NULL,
+        title VARCHAR(300) NOT NULL,
+        subtitle VARCHAR(500),
+        part_label VARCHAR(200),
+        body_html TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE(chapter_id, lang)
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_chapter_content_chapter_lang ON chapter_content(chapter_id, lang);`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_chapters_sort ON chapters(sort_order);`);
     console.log('[DB] all tables ready');
   } finally {
     client.release();
@@ -101,6 +128,80 @@ app.get('/api/health', async (req, res) => {
   }
 
   res.json(checks);
+});
+
+// ─── Public: Get table of contents (all chapters with metadata) ──────────────
+app.get('/api/chapters', async (req, res) => {
+  const lang = req.query.lang || 'zh';
+  try {
+    const result = await pool.query(`
+      SELECT c.id, c.sort_order, c.chapter_num, c.part_group, c.page_num,
+             cc.title, cc.subtitle, cc.part_label
+      FROM chapters c
+      LEFT JOIN chapter_content cc ON cc.chapter_id = c.id AND cc.lang = $1
+      ORDER BY c.sort_order
+    `, [lang]);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Public: Get single chapter content ──────────────────────────────────────
+app.get('/api/chapters/:id', async (req, res) => {
+  const lang = req.query.lang || 'zh';
+  const { id } = req.params;
+  try {
+    const result = await pool.query(`
+      SELECT c.id, c.sort_order, c.chapter_num, c.part_group, c.page_num,
+             cc.title, cc.subtitle, cc.part_label, cc.body_html
+      FROM chapters c
+      LEFT JOIN chapter_content cc ON cc.chapter_id = c.id AND cc.lang = $1
+      WHERE c.id = $2
+    `, [lang, id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Chapter not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Public: Get available languages ─────────────────────────────────────────
+app.get('/api/languages', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT DISTINCT lang FROM chapter_content ORDER BY lang');
+    res.json(result.rows.map(r => r.lang));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Admin: Update chapter content ───────────────────────────────────────────
+app.put('/api/admin/chapters/:id', requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { lang, title, subtitle, part_label, body_html } = req.body;
+  if (!lang || !title || !body_html) {
+    return res.status(400).json({ error: 'lang, title, and body_html are required' });
+  }
+  try {
+    const result = await pool.query(`
+      INSERT INTO chapter_content (chapter_id, lang, title, subtitle, part_label, body_html, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, NOW())
+      ON CONFLICT (chapter_id, lang) DO UPDATE SET
+        title = EXCLUDED.title,
+        subtitle = EXCLUDED.subtitle,
+        part_label = EXCLUDED.part_label,
+        body_html = EXCLUDED.body_html,
+        updated_at = NOW()
+      RETURNING *
+    `, [id, lang, title, subtitle || '', part_label || '', body_html]);
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ─── Admin: Switch Stripe mode ───────────────────────────────────────────────
