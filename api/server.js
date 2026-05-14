@@ -132,6 +132,11 @@ app.get('/api/health', async (req, res) => {
   res.json(checks);
 });
 
+// ─── Admin dashboard page (served from API so it always works) ───────────────
+app.get('/admin', (req, res) => {
+  res.sendFile('/usr/share/nginx/html/admin/health.html');
+});
+
 // ─── Public: Get table of contents (all chapters with metadata) ──────────────
 app.get('/api/chapters', async (req, res) => {
   const lang = req.query.lang || 'zh';

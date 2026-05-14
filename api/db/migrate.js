@@ -11,7 +11,7 @@
 
 const { Pool } = require('pg');
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:WZnCkFsqaiMpYjliaJcJzBLelEplpZJA@postgres.railway.internal:5432/railway';
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:WZnCkFsqaiMpYjliaJcJzBLelEplpZJA@shinkansen.proxy.rlwy.net:24032/railway';
 
 const pool = new Pool({
   connectionString: DATABASE_URL,

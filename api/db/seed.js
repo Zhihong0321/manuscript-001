@@ -14,7 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const { Pool } = require('pg');
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:WZnCkFsqaiMpYjliaJcJzBLelEplpZJA@postgres.railway.internal:5432/railway';
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:WZnCkFsqaiMpYjliaJcJzBLelEplpZJA@shinkansen.proxy.rlwy.net:24032/railway';
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
@@ -145,8 +145,15 @@ function extractContentBlocks(html) {
 }
 
 async function seed() {
-  // Read the HTML file
-  const htmlPath = path.join(__dirname, '..', '..', 'index.html');
+  // Read the HTML file — try the full backup first (has all content),
+  // then standalone ebook.html, then current index.html
+  let htmlPath = path.join(__dirname, '..', '..', 'index_full_backup.html');
+  if (!fs.existsSync(htmlPath)) {
+    htmlPath = path.join(__dirname, '..', '..', '..', 'ebook.html');
+  }
+  if (!fs.existsSync(htmlPath)) {
+    htmlPath = path.join(__dirname, '..', '..', 'index.html');
+  }
   console.log('[SEED] Reading:', htmlPath);
   const html = fs.readFileSync(htmlPath, 'utf-8');
 
