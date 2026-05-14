@@ -161,9 +161,9 @@
     const labelKeys = ['fontSize', 'lineHeight', 'theme', 'lang'];
     labels.forEach((el, i) => { if (labelKeys[i]) el.textContent = t(labelKeys[i]); });
 
-    // Share button
-    const shareBtn = document.getElementById('btnShare');
-    if (shareBtn) shareBtn.lastChild.textContent = ' ' + t('share');
+    // Share button (now support link)
+    const shareBtn = document.getElementById('drawerSupportLink');
+    if (shareBtn) shareBtn.lastChild.textContent = ' ' + (currentLang === 'en' ? 'Want to support this book?' : '想支持这本书？');
 
     // Share modal
     const shareTitle = document.querySelector('#shareModal h6');
@@ -306,10 +306,9 @@
     }
   });
 
-  /* ───── share modal ───── */
+  /* ───── share/copyright modal ───── */
   const shareScrim = document.getElementById('shareScrim');
   const shareClose = document.getElementById('shareClose');
-  const shareBtn = document.getElementById('btnShare');
   const shareWaBtn = document.getElementById('shareWaBtn');
 
   function openShare() {
@@ -321,7 +320,6 @@
   }
   function closeShare() { shareScrim.classList.remove('is-open'); }
 
-  if (shareBtn) shareBtn.addEventListener('click', openShare);
   if (shareClose) shareClose.addEventListener('click', closeShare);
   if (shareScrim) shareScrim.addEventListener('click', (e) => {
     if (e.target === shareScrim) closeShare();
