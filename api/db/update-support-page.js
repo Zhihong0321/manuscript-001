@@ -14,8 +14,6 @@ const pool = new Pool({
 const zhBody = `
 <p class="pullquote">如果这本书曾触动你，<br/>你可以选择支持它继续走下去。</p>
 
-<div class="support-divider"></div>
-
 <p style="text-align:center;font-size:14px;color:var(--ink-soft);line-height:1.9;margin-bottom:8px;">
 这本书免费开放阅读。<br/>
 如果你愿意支持作者继续写作与出版，<br/>
@@ -34,16 +32,12 @@ const zhBody = `
   <p class="support-note">通过 Stripe 安全支付 · 无需注册</p>
 </div>
 
-<div class="support-divider"></div>
-
-<p style="text-align:center;font-size:13px;color:var(--ink-mute);line-height:1.8;">
+<p style="text-align:center;font-size:13px;color:var(--ink-mute);line-height:1.8;margin-top:24px;">
 任何疑问，可联系作者：<br/>
 <a href="https://wa.me/601121000099" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px;">WhatsApp 601121000099</a>
 </p>
 
-<div class="support-divider"></div>
-
-<p style="text-align:center;font-size:14px;color:var(--ink-soft);line-height:1.9;">
+<p style="text-align:center;font-size:14px;color:var(--ink-soft);line-height:1.9;margin-top:20px;">
 或者，把这本书分享给你认识的人——<br/>
 <strong>转发这个网站链接，就是最大的支持。</strong>
 </p>
@@ -67,8 +61,6 @@ const zhBody = `
 const enBody = `
 <p class="pullquote">If this book has moved you,<br/>you can choose to help it reach further.</p>
 
-<div class="support-divider"></div>
-
 <p style="text-align:center;font-size:14px;color:var(--ink-soft);line-height:1.9;margin-bottom:8px;">
 This book is free to read online.<br/>
 If you'd like to support the author's continued writing,<br/>
@@ -87,16 +79,12 @@ any amount is an encouragement.
   <p class="support-note">Secure payment via Stripe · No registration needed</p>
 </div>
 
-<div class="support-divider"></div>
-
-<p style="text-align:center;font-size:13px;color:var(--ink-mute);line-height:1.8;">
+<p style="text-align:center;font-size:13px;color:var(--ink-mute);line-height:1.8;margin-top:24px;">
 Any questions? Contact the author:<br/>
 <a href="https://wa.me/601121000099" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px;">WhatsApp 601121000099</a>
 </p>
 
-<div class="support-divider"></div>
-
-<p style="text-align:center;font-size:14px;color:var(--ink-soft);line-height:1.9;">
+<p style="text-align:center;font-size:14px;color:var(--ink-soft);line-height:1.9;margin-top:20px;">
 Or share this book with someone you know —<br/>
 <strong>sharing this link is the greatest support.</strong>
 </p>
