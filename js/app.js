@@ -561,7 +561,7 @@
   function updateReceiptLanguage(isEn) {
     const $ = (id) => document.getElementById(id);
     $('receiptTitle').textContent = isEn ? 'Thank You for Your Support' : '感谢你的支持';
-    $('receiptSubtitle').textContent = isEn ? 'Your contribution has been received' : '你的奉献已确认收到';
+    $('receiptSubtitle').textContent = isEn ? 'Your payment was successful' : '你的付款已成功';
     $('receiptKeyStatus').textContent = isEn ? 'STATUS' : '状态';
     $('receiptKeyAmount').textContent = isEn ? 'AMOUNT' : '金额';
     $('receiptKeyDate').textContent = isEn ? 'DATE' : '日期';
@@ -569,6 +569,8 @@
     $('receiptMsg1').textContent = isEn ? 'May God remember your generosity.' : '愿神纪念你的慷慨。';
     $('receiptMsg2').textContent = isEn ? 'May this book bless many more.' : '愿这本书能祝福更多人。';
     $('receiptContinueBtn').textContent = isEn ? 'CONTINUE READING' : '继续阅读';
+    const dlBtn = $('receiptDownloadBtn');
+    if (dlBtn) dlBtn.querySelector('span').textContent = isEn ? 'Download Receipt PDF' : '下载收据 PDF';
   }
 
   async function fetchPaymentStatus(sessionId, isEn, retryCount) {
@@ -684,13 +686,101 @@
   const receiptClose = document.getElementById('receiptClose');
   const receiptContinueBtn = document.getElementById('receiptContinueBtn');
   const receiptRetryBtn = document.getElementById('receiptRetryBtn');
+  const receiptDownloadBtn = document.getElementById('receiptDownloadBtn');
 
   function closeReceipt() {
     receiptScrim.classList.remove('is-open');
   }
 
+  function downloadReceiptPDF() {
+    const $ = (id) => document.getElementById(id);
+    const isEn = currentLang === 'en';
+    const title = $('receiptTitle').textContent;
+    const status = $('receiptValStatus').textContent.trim();
+    const amount = $('receiptValAmount').textContent;
+    const date = $('receiptValDate').textContent;
+    const ref = $('receiptValRef').textContent;
+    const mode = $('receiptRowMode').style.display !== 'none' ? $('receiptValMode').textContent : '';
+
+    const html = `<!DOCTYPE html>
+<html lang="${isEn ? 'en' : 'zh-Hans'}">
+<head>
+<meta charset="utf-8"/>
+<title>${isEn ? 'Payment Receipt' : '付款收据'}</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: "Noto Serif SC","Cormorant Garamond",serif; background:#f4efe6; color:#1c1915; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 20px; }
+.receipt { background:#fff; border:1px solid #c8bfac; border-radius:12px; max-width:420px; width:100%; padding:48px 40px; box-shadow:0 8px 40px rgba(0,0,0,0.08); position:relative; }
+.receipt::before { content:""; position:absolute; top:0; left:50%; transform:translateX(-50%); width:60px; height:3px; background:#7a1f1f; border-radius:0 0 3px 3px; }
+.header { text-align:center; margin-bottom:28px; }
+.logo { font-family:"Cormorant Garamond",serif; font-size:11px; letter-spacing:0.5em; color:#6e6557; text-transform:uppercase; margin-bottom:16px; }
+.title { font-size:20px; font-weight:500; letter-spacing:0.06em; margin-bottom:6px; }
+.subtitle { font-size:13px; color:#6e6557; letter-spacing:0.04em; }
+.divider { width:100%; height:1px; background:repeating-linear-gradient(90deg,#c8bfac 0 4px,transparent 4px 8px); margin:20px 0; }
+.row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; }
+.key { font-family:"Noto Sans SC",sans-serif; font-size:10px; letter-spacing:0.25em; color:#6e6557; text-transform:uppercase; }
+.val { font-size:14px; color:#1c1915; letter-spacing:0.02em; }
+.val.amount { font-family:"Cormorant Garamond",serif; font-size:20px; font-weight:500; }
+.val.status { color:#2d8a4e; font-weight:500; }
+.val.ref { font-family:"Cormorant Garamond",serif; font-size:11px; color:#6e6557; font-style:italic; }
+.mode-badge { font-family:"Noto Sans SC",sans-serif; font-size:9px; letter-spacing:0.2em; padding:2px 8px; border:1px solid #8c6a2b; border-radius:3px; color:#8c6a2b; text-transform:uppercase; }
+.message { text-align:center; margin:24px 0; font-style:italic; font-size:14px; line-height:1.9; color:#3a342c; }
+.footer { text-align:center; padding-top:16px; border-top:1px solid #c8bfac; }
+.author { font-family:"Noto Sans SC",sans-serif; font-size:11px; letter-spacing:0.12em; color:#6e6557; margin-bottom:8px; }
+.book { font-size:12px; color:#7a1f1f; letter-spacing:0.06em; }
+.stamp { position:absolute; top:32px; right:32px; width:48px; height:48px; border:2px solid #2d8a4e; border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0.6; transform:rotate(-12deg); }
+.stamp span { font-family:"Noto Sans SC",sans-serif; font-size:8px; letter-spacing:0.15em; color:#2d8a4e; text-transform:uppercase; font-weight:700; }
+@media print { body { background:#fff; padding:0; } .receipt { box-shadow:none; border:none; max-width:100%; } }
+</style>
+</head>
+<body>
+<div class="receipt">
+  <div class="stamp"><span>${isEn ? 'PAID' : '已付'}</span></div>
+  <div class="header">
+    <div class="logo">${isEn ? 'Payment Receipt' : '付 款 收 据'}</div>
+    <div class="title">${title}</div>
+    <div class="subtitle">${isEn ? 'Your payment was successful' : '你的付款已成功'}</div>
+  </div>
+  <div class="divider"></div>
+  <div class="row"><span class="key">${isEn ? 'STATUS' : '状态'}</span><span class="val status">${status}</span></div>
+  <div class="row"><span class="key">${isEn ? 'AMOUNT' : '金额'}</span><span class="val amount">${amount}</span></div>
+  <div class="row"><span class="key">${isEn ? 'DATE' : '日期'}</span><span class="val">${date}</span></div>
+  <div class="row"><span class="key">${isEn ? 'REFERENCE' : '参考号'}</span><span class="val ref">${ref}</span></div>
+  ${mode ? `<div class="row"><span class="key">${isEn ? 'MODE' : '模式'}</span><span class="mode-badge">${mode}</span></div>` : ''}
+  <div class="divider"></div>
+  <div class="message">
+    <p>${isEn ? 'May God remember your generosity.' : '愿神纪念你的慷慨。'}</p>
+    <p>${isEn ? 'May this book bless many more.' : '愿这本书能祝福更多人。'}</p>
+  </div>
+  <div class="footer">
+    <div class="author">— 颜志鸿 · Gan Zhi Hong</div>
+    <div class="book">《原来我们都在侍奉假神》</div>
+  </div>
+</div>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, '_blank');
+    if (win) {
+      win.onload = () => {
+        setTimeout(() => { win.print(); URL.revokeObjectURL(url); }, 300);
+      };
+    } else {
+      // Fallback: download as HTML file
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = isEn ? 'payment-receipt.html' : '付款收据.html';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  }
+
   if (receiptClose) receiptClose.addEventListener('click', closeReceipt);
   if (receiptContinueBtn) receiptContinueBtn.addEventListener('click', closeReceipt);
+  if (receiptDownloadBtn) receiptDownloadBtn.addEventListener('click', downloadReceiptPDF);
   if (receiptScrim) receiptScrim.addEventListener('click', (e) => { if (e.target === receiptScrim) closeReceipt(); });
   if (receiptRetryBtn) receiptRetryBtn.addEventListener('click', () => {
     window.location.reload();

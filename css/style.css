@@ -2095,6 +2095,29 @@
     color: var(--ink-mute);
     margin-bottom: 18px;
   }
+  .receipt-download-btn {
+    width: 100%;
+    padding: 12px 24px;
+    background: none;
+    color: var(--ink-soft);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    transition: border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .receipt-download-btn:hover {
+    border-color: var(--accent);
+    color: var(--ink);
+    background: color-mix(in oklab, var(--paper) 92%, var(--accent) 6%);
+  }
   .receipt-continue-btn {
     width: 100%;
     padding: 14px 24px;
