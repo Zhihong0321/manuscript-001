@@ -465,7 +465,8 @@
     const curBtn = form.querySelector('.support-cur-btn.is-on');
     const amount = parseInt(input.value, 10);
     const currency = curBtn ? curBtn.dataset.cur : 'myr';
-    if (!amount || amount < 1) { input.style.borderColor = 'var(--accent)'; return; }
+    const minAmount = currency === 'myr' ? 2 : 1;
+    if (!amount || amount < minAmount) { input.style.borderColor = 'var(--accent)'; input.placeholder = currency === 'myr' ? '最少 RM2' : 'Min $1'; return; }
     payBtn.disabled = true; payBtn.textContent = '...';
     try {
       const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amount * 100, currency }) });

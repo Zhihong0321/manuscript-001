@@ -14,9 +14,35 @@ let stripeDemo = null;
 try { if (process.env.STRIPE_SECRET_KEY) stripeLive = new Stripe(process.env.STRIPE_SECRET_KEY); } catch(e) { console.error('[STRIPE] Live key error:', e.message); }
 try { if (process.env.STRIPE_DEMO_KEY) stripeDemo = new Stripe(process.env.STRIPE_DEMO_KEY); } catch(e) { console.error('[STRIPE] Demo key error:', e.message); }
 
-// Default mode: use demo if live key missing
+// Default mode: use demo if live key missing (will be overridden from DB on startup)
 let stripeMode = stripeLive ? 'live' : 'demo';
 function getStripe() { return stripeMode === 'live' ? stripeLive : stripeDemo; }
+
+// Load persisted stripe mode from DB
+async function loadStripeMode(client) {
+  try {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS settings (
+        key VARCHAR(100) PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+    const result = await client.query("SELECT value FROM settings WHERE key = 'stripe_mode'");
+    if (result.rows.length > 0) {
+      const saved = result.rows[0].value;
+      if (saved === 'live' && stripeLive) { stripeMode = 'live'; }
+      else if (saved === 'demo' && stripeDemo) { stripeMode = 'demo'; }
+      console.log('[STRIPE] Loaded persisted mode:', stripeMode);
+    } else {
+      // Save current default
+      await client.query("INSERT INTO settings (key, value) VALUES ('stripe_mode', $1)", [stripeMode]);
+      console.log('[STRIPE] Saved initial mode:', stripeMode);
+    }
+  } catch (err) {
+    console.error('[STRIPE] Failed to load mode from DB:', err.message);
+  }
+}
 
 // PostgreSQL
 const pool = new Pool({
@@ -93,6 +119,9 @@ async function initDB() {
     await client.query(`CREATE INDEX IF NOT EXISTS idx_chapter_content_chapter_lang ON chapter_content(chapter_id, lang);`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_chapters_sort ON chapters(sort_order);`);
     console.log('[DB] all tables ready');
+
+    // Load persisted stripe mode
+    await loadStripeMode(client);
   } finally {
     client.release();
   }
@@ -145,7 +174,7 @@ app.get('/api/checkout-test', async (req, res) => {
         price_data: {
           currency: 'myr',
           product_data: { name: 'Test', description: 'Checkout test' },
-          unit_amount: 100,
+          unit_amount: 200,
         },
         quantity: 1,
       }],
@@ -234,11 +263,19 @@ app.put('/api/admin/chapters/:id', requireAdmin, async (req, res) => {
   }
 });
 
-// ─── Admin: Switch Stripe mode ───────────────────────────────────────────────
-app.post('/api/admin/stripe-mode', requireAdmin, (req, res) => {
+// ─── Admin: Switch Stripe mode (persisted to DB) ─────────────────────────────
+app.post('/api/admin/stripe-mode', requireAdmin, async (req, res) => {
   const { mode } = req.body;
-  if (mode === 'live' && stripeLive) { stripeMode = 'live'; return res.json({ mode: stripeMode }); }
-  if (mode === 'demo' && stripeDemo) { stripeMode = 'demo'; return res.json({ mode: stripeMode }); }
+  if (mode === 'live' && stripeLive) {
+    stripeMode = 'live';
+    await pool.query("INSERT INTO settings (key, value, updated_at) VALUES ('stripe_mode', $1, NOW()) ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = NOW()", [stripeMode]);
+    return res.json({ mode: stripeMode, persisted: true });
+  }
+  if (mode === 'demo' && stripeDemo) {
+    stripeMode = 'demo';
+    await pool.query("INSERT INTO settings (key, value, updated_at) VALUES ('stripe_mode', $1, NOW()) ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = NOW()", [stripeMode]);
+    return res.json({ mode: stripeMode, persisted: true });
+  }
   res.status(400).json({ error: 'Invalid mode or key not set', available: { live: !!stripeLive, demo: !!stripeDemo } });
 });
 
@@ -288,7 +325,10 @@ app.post('/api/checkout', async (req, res) => {
   if (!['myr', 'usd'].includes(cur)) return res.status(400).json({ error: 'Invalid currency' });
 
   const amountNum = parseInt(amount, 10);
-  if (!amountNum || amountNum < 100) return res.status(400).json({ error: 'Minimum RM1 / $1' });
+  // Stripe minimums: MYR RM2 (200 cents), USD $0.50 (50 cents)
+  const minAmount = cur === 'myr' ? 200 : 50;
+  const minLabel = cur === 'myr' ? 'RM2' : '$1';
+  if (!amountNum || amountNum < minAmount) return res.status(400).json({ error: `Minimum ${minLabel}` });
   if (amountNum > 999900) return res.status(400).json({ error: 'Too large' });
 
   // Determine base URL from Origin or Referer header (nginx may not forward Origin)
