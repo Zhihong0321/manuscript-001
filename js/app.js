@@ -449,12 +449,10 @@
     }
   });
 
-  /* ───── Support form: currency + amount ───── */
+  /* ───── Support form: currency ───── */
   document.addEventListener('click', (e) => {
     const curBtn = e.target.closest('.support-cur-btn');
     if (curBtn) { curBtn.closest('.support-currency').querySelectorAll('.support-cur-btn').forEach(b => b.classList.remove('is-on')); curBtn.classList.add('is-on'); return; }
-    const amtBtn = e.target.closest('.support-amt-btn');
-    if (amtBtn) { amtBtn.closest('.support-amounts').querySelectorAll('.support-amt-btn').forEach(b => b.classList.remove('is-on')); amtBtn.classList.add('is-on'); const input = amtBtn.closest('.support-form').querySelector('input[type="number"]'); if (input) input.value = amtBtn.dataset.amt; return; }
   });
 
   /* ───── Stripe checkout ───── */
