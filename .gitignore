@@ -1,3 +1,6 @@
 *.ps1
 .DS_Store
 Thumbs.db
+.env
+node_modules/
+api/node_modules/

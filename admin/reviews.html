@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Admin · Reviews</title>
+<style>
+  :root {
+    --paper: #f4efe6;
+    --ink: #1c1915;
+    --ink-soft: #3a342c;
+    --ink-mute: #6e6557;
+    --rule: #c8bfac;
+    --accent: #7a1f1f;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    margin: 0;
+    padding: 24px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 22px; margin: 0 0 24px; letter-spacing: 0.05em; }
+  .login-box {
+    max-width: 320px;
+    margin: 80px auto;
+    text-align: center;
+  }
+  .login-box input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    font-size: 15px;
+    background: #fff;
+    margin-bottom: 12px;
+  }
+  .login-box button {
+    width: 100%;
+    padding: 10px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .login-box button:hover { opacity: 0.85; }
+  .error { color: var(--accent); font-size: 13px; margin-top: 8px; }
+
+  .admin-panel { max-width: 800px; margin: 0 auto; }
+  .review-card {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .review-card .meta {
+    font-size: 12px;
+    color: var(--ink-mute);
+    margin-bottom: 8px;
+  }
+  .review-card .comment {
+    font-size: 15px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+  .review-card .contact {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #fef9f0;
+    border: 1px dashed var(--accent);
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--accent);
+  }
+  .review-card .contact::before {
+    content: "📞 联络方式（仅管理员可见）：";
+    font-weight: 600;
+  }
+  .btn-delete {
+    margin-top: 10px;
+    padding: 6px 14px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .btn-delete:hover { opacity: 0.8; }
+  .count { font-size: 13px; color: var(--ink-mute); margin-bottom: 16px; }
+  .empty { text-align: center; color: var(--ink-mute); padding: 40px; }
+</style>
+</head>
+<body>
+
+<div class="login-box" id="loginBox">
+  <h1>管理员登录</h1>
+  <input type="password" id="pwdInput" placeholder="输入管理密码" />
+  <button onclick="doLogin()">登录</button>
+  <div class="error" id="loginError" style="display:none"></div>
+</div>
+
+<div class="admin-panel" id="adminPanel" style="display:none">
+  <h1>读者回应管理</h1>
+  <div class="count" id="reviewCount"></div>
+  <div id="reviewList"></div>
+</div>
+
+<script>
+  let adminPassword = '';
+
+  function doLogin() {
+    const pwd = document.getElementById('pwdInput').value.trim();
+    if (!pwd) return;
+    adminPassword = pwd;
+    loadReviews();
+  }
+
+  document.getElementById('pwdInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  async function loadReviews() {
+    try {
+      const res = await fetch('/api/admin/reviews', {
+        headers: { 'X-Admin-Password': adminPassword }
+      });
+      if (res.status === 401) {
+        document.getElementById('loginError').textContent = '密码错误';
+        document.getElementById('loginError').style.display = 'block';
+        return;
+      }
+      const reviews = await res.json();
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      document.getElementById('reviewCount').textContent = `共 ${reviews.length} 条回应`;
+      renderReviews(reviews);
+    } catch (err) {
+      document.getElementById('loginError').textContent = '连接失败';
+      document.getElementById('loginError').style.display = 'block';
+    }
+  }
+
+  function renderReviews(reviews) {
+    const list = document.getElementById('reviewList');
+    if (reviews.length === 0) {
+      list.innerHTML = '<div class="empty">暂无回应</div>';
+      return;
+    }
+    list.innerHTML = reviews.map(r => `
+      <div class="review-card" data-id="${r.id}">
+        <div class="meta">
+          <strong>${escHtml(r.name || '匿名')}</strong>
+          ${r.role_church ? ' · ' + escHtml(r.role_church) : ''}
+          &nbsp;—&nbsp;${new Date(r.created_at).toLocaleString('zh-CN')}
+        </div>
+        <div class="comment">${escHtml(r.comment)}</div>
+        ${r.contact ? `<div class="contact">${escHtml(r.contact)}</div>` : ''}
+        <button class="btn-delete" onclick="deleteReview(${r.id})">删除</button>
+      </div>
+    `).join('');
+  }
+
+  async function deleteReview(id) {
+    if (!confirm('确定删除这条回应？')) return;
+    try {
+      const res = await fetch('/api/admin/reviews/' + id, {
+        method: 'DELETE',
+        headers: { 'X-Admin-Password': adminPassword }
+      });
+      if (res.ok) loadReviews();
+    } catch (err) {
+      alert('删除失败');
+    }
+  }
+
+  function escHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+</script>
+</body>
+</html>
