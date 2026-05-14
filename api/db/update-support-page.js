@@ -47,7 +47,7 @@ const zhBody = `
     <button class="support-cur-btn" data-cur="usd">USD</button>
   </div>
   <div class="support-custom">
-    <input type="number" min="1" max="9999" placeholder="输入任意金额" value="" />
+    <input type="number" min="2" max="9999" placeholder="谢谢你的鼓励" value="" />
   </div>
   <button class="support-pay-btn">支持这本书</button>
   <p class="support-note">通过 Stripe 安全支付 · 无需注册</p>
@@ -95,7 +95,7 @@ any amount is an encouragement.
     <button class="support-cur-btn" data-cur="usd">USD</button>
   </div>
   <div class="support-custom">
-    <input type="number" min="1" max="9999" placeholder="Enter any amount" value="" />
+    <input type="number" min="2" max="9999" placeholder="Thank you for your support" value="" />
   </div>
   <button class="support-pay-btn">Support This Book</button>
   <p class="support-note">Secure payment via Stripe · No registration needed</p>
