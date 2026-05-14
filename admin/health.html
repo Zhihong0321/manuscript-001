@@ -3,36 +3,165 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Health</title>
+<title>Admin Dashboard</title>
 <style>
-  body { font-family: monospace; background: #111; color: #eee; padding: 32px; font-size: 14px; }
-  pre { background: #1a1a1a; border: 1px solid #333; padding: 16px; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; }
-  .ok { color: #4f4; }
-  .err { color: #f44; }
-  a { color: #6cf; }
-  button { margin-top: 12px; padding: 8px 16px; background: #333; color: #eee; border: 1px solid #555; cursor: pointer; font-family: monospace; }
+  * { box-sizing: border-box; }
+  body { font-family: monospace; background: #0d1117; color: #e6edf3; padding: 20px; font-size: 13px; line-height: 1.6; }
+  h2 { color: #58a6ff; margin: 24px 0 8px; font-size: 14px; }
+  pre { background: #161b22; border: 1px solid #30363d; padding: 12px; border-radius: 6px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+  .ok { color: #3fb950; }
+  .err { color: #f85149; }
+  .warn { color: #d29922; }
+  button, .btn { padding: 6px 14px; background: #21262d; color: #e6edf3; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-family: monospace; font-size: 12px; margin: 4px 4px 4px 0; text-decoration: none; display: inline-block; }
+  button:hover, .btn:hover { border-color: #58a6ff; color: #58a6ff; }
+  .active { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+  input { background: #0d1117; border: 1px solid #30363d; color: #e6edf3; padding: 6px 10px; border-radius: 4px; font-family: monospace; font-size: 12px; width: 200px; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #21262d; font-size: 12px; }
+  th { color: #8b949e; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+  .pill-ok { background: #1a3a1a; color: #3fb950; }
+  .pill-pending { background: #3a2a0a; color: #d29922; }
+  .pill-expired { background: #3a1a1a; color: #f85149; }
+  .pill-demo { background: #1a2a3a; color: #58a6ff; }
+  .pill-live { background: #1a3a1a; color: #3fb950; }
+  #login { max-width: 300px; margin: 100px auto; text-align: center; }
 </style>
 </head>
 <body>
-<h2>/api/health</h2>
-<pre id="out">loading...</pre>
-<button onclick="check()">refresh</button>
+
+<div id="login">
+  <h2>Admin Login</h2>
+  <input type="password" id="pw" placeholder="admin password" />
+  <button onclick="login()">Enter</button>
+</div>
+
+<div id="dashboard" style="display:none">
+
+<h2>⚡ SYSTEM HEALTH</h2>
+<pre id="health">loading...</pre>
+<button onclick="check()">Refresh</button>
+
+<h2>🔑 STRIPE MODE</h2>
+<button id="btnLive" onclick="setMode('live')">LIVE</button>
+<button id="btnDemo" onclick="setMode('demo')">DEMO</button>
+<span id="modeStatus"></span>
+
+<h2>💰 PAYMENTS</h2>
+<button onclick="loadPayments()">Load</button>
+<button onclick="syncPayments()">Sync Pending from Stripe</button>
+<div id="paySummary"></div>
+<div id="payTable"></div>
+
+<h2>📝 REVIEWS</h2>
+<button onclick="loadReviews()">Load</button>
+<div id="reviewsTable"></div>
+
+<h2>📊 READING</h2>
+<button onclick="loadReading()">Load</button>
+<div id="readingTable"></div>
+
 <br><br>
-<a href="/admin/reviews.html">reviews</a> · <a href="/">site</a>
+<a class="btn" href="/">← Back to site</a>
+
+</div>
+
 <script>
+let adminPw = localStorage.getItem('admin-pw') || '';
+
+function login() {
+  adminPw = document.getElementById('pw').value;
+  localStorage.setItem('admin-pw', adminPw);
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  check();
+}
+
+// Auto-login if saved
+if (adminPw) { login(); }
+
+function headers() { return { 'Content-Type': 'application/json', 'x-admin-password': adminPw }; }
+
 async function check() {
-  const el = document.getElementById('out');
+  const el = document.getElementById('health');
   try {
     const r = await fetch('/api/health');
     const d = await r.json();
     el.innerHTML = JSON.stringify(d, null, 2)
       .replace(/"connected[^"]*"/g, '<span class="ok">$&</span>')
       .replace(/"error[^"]*"/g, '<span class="err">$&</span>');
-  } catch(e) {
-    el.innerHTML = '<span class="err">FETCH FAILED: ' + e.message + '</span>';
-  }
+    // Update mode buttons
+    document.getElementById('btnLive').className = d.stripe_mode === 'live' ? 'active' : '';
+    document.getElementById('btnDemo').className = d.stripe_mode === 'demo' ? 'active' : '';
+    document.getElementById('modeStatus').innerHTML = d.stripe_status.includes('error')
+      ? '<span class="err">' + d.stripe_status + '</span>'
+      : '<span class="ok">' + d.stripe_status + '</span>';
+  } catch(e) { el.innerHTML = '<span class="err">' + e.message + '</span>'; }
 }
-check();
+
+async function setMode(mode) {
+  const r = await fetch('/api/admin/stripe-mode', { method: 'POST', headers: headers(), body: JSON.stringify({ mode }) });
+  const d = await r.json();
+  if (d.mode) { check(); } else { alert(JSON.stringify(d)); }
+}
+
+async function loadPayments() {
+  const r = await fetch('/api/admin/payments', { headers: headers() });
+  if (r.status === 401) { alert('Wrong password'); return; }
+  const d = await r.json();
+
+  // Summary
+  let html = '<table><tr><th>Currency</th><th>Mode</th><th>Status</th><th>Count</th><th>Total</th></tr>';
+  for (const s of d.summary) {
+    html += `<tr><td>${s.currency.toUpperCase()}</td><td><span class="pill pill-${s.mode}">${s.mode}</span></td><td>${s.status}</td><td>${s.count}</td><td>${(s.total_cents/100).toFixed(2)}</td></tr>`;
+  }
+  html += '</table>';
+  document.getElementById('paySummary').innerHTML = html;
+
+  // Table
+  html = '<table><tr><th>Time</th><th>Amount</th><th>Status</th><th>Mode</th><th>Email</th><th>Session</th></tr>';
+  for (const p of d.payments) {
+    const status = p.status === 'completed' ? 'pill-ok' : p.status === 'pending' ? 'pill-pending' : 'pill-expired';
+    html += `<tr><td>${p.created_at?.substring(0,16)}</td><td>${(p.amount_cents/100).toFixed(2)} ${p.currency.toUpperCase()}</td><td><span class="pill ${status}">${p.status}</span></td><td><span class="pill pill-${p.mode}">${p.mode}</span></td><td>${p.customer_email||'-'}</td><td>${p.stripe_session_id?.substring(0,20)}...</td></tr>`;
+  }
+  html += '</table>';
+  document.getElementById('payTable').innerHTML = html;
+}
+
+async function syncPayments() {
+  const r = await fetch('/api/admin/payments/sync', { method: 'POST', headers: headers() });
+  const d = await r.json();
+  alert('Synced: ' + d.synced + ' / Checked: ' + d.checked);
+  loadPayments();
+}
+
+async function loadReviews() {
+  const r = await fetch('/api/admin/reviews', { headers: headers() });
+  if (r.status === 401) { alert('Wrong password'); return; }
+  const d = await r.json();
+  let html = '<table><tr><th>Time</th><th>Name</th><th>Church</th><th>Comment</th><th>Contact</th><th></th></tr>';
+  for (const rv of d) {
+    html += `<tr><td>${rv.created_at?.substring(0,10)}</td><td>${rv.name||'-'}</td><td>${rv.role_church||'-'}</td><td>${rv.comment?.substring(0,60)}</td><td>${rv.contact||'-'}</td><td><button onclick="delReview(${rv.id})">×</button></td></tr>`;
+  }
+  html += '</table>';
+  document.getElementById('reviewsTable').innerHTML = html;
+}
+
+async function delReview(id) {
+  if (!confirm('Delete?')) return;
+  await fetch('/api/admin/reviews/' + id, { method: 'DELETE', headers: headers() });
+  loadReviews();
+}
+
+async function loadReading() {
+  const r = await fetch('/api/admin/reading', { headers: headers() });
+  if (r.status === 401) { alert('Wrong password'); return; }
+  const d = await r.json();
+  let html = '<table><tr><th>Chapter</th><th>Readers</th></tr>';
+  for (const row of d) { html += `<tr><td>${row.chapter}</td><td>${row.readers}</td></tr>`; }
+  html += '</table>';
+  document.getElementById('readingTable').innerHTML = html;
+}
 </script>
 </body>
 </html>
