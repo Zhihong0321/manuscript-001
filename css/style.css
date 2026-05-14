@@ -1141,39 +1141,247 @@
 
   /* ───────────────────────── drawer contact ──────────────────────── */
   .drawer-contact {
-    margin-top: 16px;
-    padding-top: 14px;
-    border-top: 1px solid var(--rule);
+    margin-top: 20px;
+    padding-top: 0;
+    border-top: none;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 0;
     text-align: center;
   }
+  .drawer-contact-divider {
+    width: 24px;
+    height: 1px;
+    background: var(--rule);
+    margin: 0 auto 16px;
+  }
   .drawer-contact-name {
-    font-family: var(--font-sans);
-    font-size: 11px;
-    letter-spacing: 0.18em;
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
     color: var(--ink);
+    padding-left: 0.2em;
+  }
+  .drawer-contact-name-en {
+    font-family: var(--font-latin);
+    font-size: 11px;
+    font-style: italic;
+    letter-spacing: 0.12em;
+    color: var(--ink-mute);
+    margin-top: 3px;
   }
   .drawer-contact-church {
     font-family: var(--font-sans);
     font-size: 10px;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.15em;
+    color: var(--ink-soft);
+    margin-top: 10px;
+  }
+  .drawer-contact-loc {
+    font-family: var(--font-sans);
+    font-size: 9px;
+    letter-spacing: 0.3em;
     color: var(--ink-mute);
+    text-transform: uppercase;
+    margin-top: 3px;
+    padding-left: 0.3em;
   }
   .drawer-contact-wa {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    margin-top: 8px;
-    padding: 6px 14px;
-    border: 1px solid #25d366;
-    border-radius: 5px;
-    color: #25d366;
+    gap: 6px;
+    margin-top: 14px;
+    padding: 8px 18px;
+    border: 1px solid color-mix(in oklab, var(--rule) 80%, #25d366 20%);
+    border-radius: 6px;
+    color: var(--ink-soft);
     font-family: var(--font-sans);
     font-size: 11px;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-decoration: none;
+    transition: border-color .15s ease, color .15s ease, background .15s ease;
   }
-  .drawer-contact-wa:hover { background: rgba(37,211,102,0.08); }
+  .drawer-contact-wa:hover {
+    border-color: #25d366;
+    color: #25d366;
+    background: rgba(37,211,102,0.05);
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     ENGLISH TYPOGRAPHY OVERRIDES
+     Activated when JS sets <html lang="en">
+     ═══════════════════════════════════════════════════════════════════ */
+
+  html[lang="en"] {
+    --font-serif: "Cormorant Garamond", "Georgia", serif;
+    --font-sans:  "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --reader-lh:  1.78;
+    --reader-fs:  18px;
+  }
+
+  /* ── prose body ── */
+  html[lang="en"] .prose {
+    letter-spacing: 0;
+    word-spacing: 0.01em;
+  }
+  html[lang="en"] .prose p {
+    text-align: left;
+    text-justify: auto;
+    text-indent: 0;
+    margin: 0 0 1.25em;
+    hanging-punctuation: none;
+  }
+  html[lang="en"] .prose strong {
+    font-weight: 600;  /* Cormorant Garamond 600 loaded */
+    color: var(--ink);
+  }
+  html[lang="en"] .prose em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  /* ── pullquotes ── */
+  html[lang="en"] .pullquote {
+    font-size: calc(var(--reader-fs) + 4px);
+    letter-spacing: 0.01em;
+    line-height: 1.5;
+  }
+
+  /* ── section headings ── */
+  html[lang="en"] .prose h3.section {
+    letter-spacing: 0.06em;
+    font-size: calc(var(--reader-fs) + 4px);
+  }
+  html[lang="en"] .prose h4.sub {
+    letter-spacing: 0.02em;
+    font-size: calc(var(--reader-fs) + 1px);
+    font-weight: 500;
+  }
+
+  /* ── scripture blockquotes ── */
+  html[lang="en"] blockquote.verse {
+    font-size: calc(var(--reader-fs) - 1px);
+    line-height: 1.7;
+    letter-spacing: 0;
+    padding: 24px 26px 20px;
+  }
+  html[lang="en"] blockquote.verse .ref {
+    letter-spacing: 0.15em;
+    font-size: 10px;
+  }
+
+  /* ── chapter header ── */
+  html[lang="en"] .chapter-header .chapter-eyebrow {
+    letter-spacing: 0.25em;
+    font-size: 11px;
+  }
+  html[lang="en"] .chapter-header .chapter-title {
+    letter-spacing: 0.02em;
+    font-size: clamp(24px, 5.5vw, 32px);
+    line-height: 1.3;
+    font-weight: 500;
+  }
+  html[lang="en"] .chapter-header .chapter-num {
+    font-size: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── opener (chapter epigraph) ── */
+  html[lang="en"] .opener .label {
+    letter-spacing: 0.25em;
+  }
+  html[lang="en"] .opener .q {
+    font-size: calc(var(--reader-fs) + 2px);
+    line-height: 1.6;
+    letter-spacing: 0;
+  }
+
+  /* ── bullet lists ── */
+  html[lang="en"] ul.bullets li {
+    line-height: 1.7;
+    padding: 6px 0 6px 24px;
+  }
+
+  /* ── chapter nav ── */
+  html[lang="en"] .chapter-nav .nav-label {
+    letter-spacing: 0.15em;
+  }
+  html[lang="en"] .chapter-nav .nav-title {
+    letter-spacing: 0.01em;
+    font-size: 14px;
+  }
+
+  /* ── TOC adjustments ── */
+  html[lang="en"] .toc-head .title {
+    letter-spacing: 0.03em;
+    font-size: 26px;
+  }
+  html[lang="en"] .toc-part-title {
+    letter-spacing: 0.06em;
+    font-size: 14px;
+  }
+  html[lang="en"] .toc-name {
+    letter-spacing: 0.01em;
+    font-size: 16px;
+  }
+  html[lang="en"] .toc-sub {
+    font-size: 13px;
+    line-height: 1.6;
+    letter-spacing: 0;
+  }
+
+  /* ── callout boxes ── */
+  html[lang="en"] .callout {
+    line-height: 1.7;
+    font-size: calc(var(--reader-fs) - 1px);
+  }
+  html[lang="en"] .callout .tag {
+    letter-spacing: 0.2em;
+  }
+
+  /* ── signoff ── */
+  html[lang="en"] .signoff {
+    letter-spacing: 0.3em;
+  }
+
+  /* ── prayer block ── */
+  html[lang="en"] .prayer-body {
+    line-height: 1.8;
+    font-size: var(--reader-fs);
+  }
+
+  /* ── image captions ── */
+  html[lang="en"] .book-img figcaption .cap {
+    letter-spacing: 0.02em;
+  }
+  html[lang="en"] .book-img figcaption .desc {
+    letter-spacing: 0;
+  }
+
+  /* ── case studies ── */
+  html[lang="en"] .case dd {
+    line-height: 1.7;
+  }
+
+  /* ── settings drawer labels ── */
+  html[lang="en"] .drawer h6 {
+    letter-spacing: 0.25em;
+  }
+  html[lang="en"] .drawer .row > .label {
+    letter-spacing: 0.08em;
+  }
+
+  /* ── topbar crumb ── */
+  html[lang="en"] .topbar .crumb {
+    letter-spacing: 0.1em;
+    font-size: 11px;
+  }
+
+  /* ── desktop bump for English ── */
+  @media (min-width: 720px) {
+    html[lang="en"] { --reader-fs: 19px; }
+  }
