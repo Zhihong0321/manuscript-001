@@ -32,7 +32,7 @@
 
 <div id="login">
   <h2>Admin Login</h2>
-  <input type="password" id="pw" placeholder="admin password" />
+  <input type="password" id="pw" placeholder="admin password" onkeydown="if(event.key==='Enter')login()" />
   <button onclick="login()">Enter</button>
 </div>
 
@@ -69,12 +69,33 @@
 <script>
 let adminPw = localStorage.getItem('admin-pw') || '';
 
-function login() {
-  adminPw = document.getElementById('pw').value;
-  localStorage.setItem('admin-pw', adminPw);
-  document.getElementById('login').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
-  check();
+async function login() {
+  const pwInput = document.getElementById('pw');
+  const inputPw = pwInput.value || adminPw;
+  if (!inputPw) return;
+
+  // Validate password against server
+  try {
+    const r = await fetch('/api/admin/reading', { headers: { 'Content-Type': 'application/json', 'x-admin-password': inputPw } });
+    if (r.status === 401) {
+      localStorage.removeItem('admin-pw');
+      adminPw = '';
+      pwInput.value = '';
+      pwInput.style.borderColor = '#f85149';
+      pwInput.placeholder = 'wrong password';
+      document.getElementById('login').style.display = '';
+      document.getElementById('dashboard').style.display = 'none';
+      return;
+    }
+    adminPw = inputPw;
+    localStorage.setItem('admin-pw', adminPw);
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    check();
+  } catch(e) {
+    pwInput.style.borderColor = '#f85149';
+    pwInput.placeholder = 'connection error';
+  }
 }
 
 // Auto-login if saved
