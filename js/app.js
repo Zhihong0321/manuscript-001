@@ -160,7 +160,10 @@
       </header>
     `;
     const nav = buildNav(idx);
-    const body = data.body_html || `<p>${t('editingMsg')}</p>`;
+    let body = data.body_html || `<p>${t('editingMsg')}</p>`;
+    // Rewrite relative image paths to absolute so they work on sub-URLs (e.g. /books/fake-god/)
+    body = body.replace(/src=(["'])image\//g, 'src=$1/image/');
+
     readerArticle.innerHTML = header + '<div class="prose">' + body + '<div class="signoff">' + t('signoff') + '</div>' + nav + '</div>';
 
     // Translate support page elements if this is the support chapter
