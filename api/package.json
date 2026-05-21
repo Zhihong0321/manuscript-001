@@ -10,10 +10,11 @@
     "db:seed": "node db/seed.js"
   },
   "dependencies": {
-    "express": "4.21.2",
-    "pg": "8.13.1",
     "cors": "2.8.5",
+    "express": "4.21.2",
     "helmet": "8.0.0",
+    "pg": "^8.20.0",
     "stripe": "17.5.0"
-  }
+  },
+  "devDependencies": {}
 }

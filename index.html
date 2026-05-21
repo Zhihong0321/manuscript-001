@@ -14,9 +14,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/style.css?v=3" />
+<link rel="stylesheet" href="/css/style.css?v=4" />
 </head>
-<body data-screen-label="ebook" data-current="cover">
+<body data-screen-label="ebook" data-current="store">
 
 <!-- ════════════════════════════ SHARING GATE ══════════════════════════ -->
 <!-- Gate removed - sharing notes moved to settings panel -->
@@ -24,10 +24,42 @@
 <!-- reading progress bar -->
 <div class="progress" id="progress" style="display:none"><div class="bar" id="progressBar"></div></div>
 
+<!-- ════════════════════════════ BOOK STORE VIEW ════════════════════════════ -->
+<section class="view is-active" id="view-store" data-screen-label="00 Store">
+  <div class="store">
+    <header class="store-head">
+      <div class="store-brand">
+        <span class="store-logo">颜志鸿</span>
+        <span class="store-logo-en">Gan Zhi Hong</span>
+      </div>
+      <button class="cover-lang-swap" id="storeLangSwap" aria-label="Switch language">
+        <span class="lang-zh" data-active="true">中</span>
+        <span class="lang-divider">|</span>
+        <span class="lang-en">EN</span>
+      </button>
+    </header>
+
+    <div class="store-intro">
+      <h2 class="store-title" id="storeTitle">书　房</h2>
+      <p class="store-subtitle" id="storeSubtitle">著作与灵修读物</p>
+    </div>
+
+    <div class="store-grid" id="storeGrid">
+      <!-- Book cards rendered by JS -->
+      <p class="store-loading">加载中…</p>
+    </div>
+
+    <footer class="store-foot">
+      <span>© 2026 颜志鸿 Gan Zhi Hong</span>
+    </footer>
+  </div>
+</section>
+
 <!-- ════════════════════════════ COVER VIEW ════════════════════════════ -->
-<section class="view is-active" id="view-cover" data-screen-label="01 Cover">
+<section class="view" id="view-cover" data-screen-label="01 Cover">
   <div class="cover">
     <header class="cover-head">
+      <a href="/" class="cover-back-link">← 书房</a>
       <span>Volume One</span>
       <button class="cover-lang-swap" id="coverLangSwap" aria-label="Switch language">
         <span class="lang-zh" data-active="true">中</span>
@@ -37,6 +69,7 @@
     </header>
 
     <div class="cover-stage">
+      <img class="cover-img" src="/image/golden_calf.png" alt="" />
       <div class="cover-eyebrow">
         <span>写给教牧</span>
         <span class="dot"></span>
@@ -325,7 +358,7 @@
   </div>
 </div>
 
-<script src="js/app.js?v=3"></script>
+<script src="/js/app.js?v=4"></script>
 </body>
 </html>
 

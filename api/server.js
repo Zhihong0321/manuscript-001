@@ -113,11 +113,49 @@ async function initDB() {
         body_html TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW(),
-        UNIQUE(chapter_id, lang)
+        UNIQUE(book_id, chapter_id, lang)
       );
     `);
-    await client.query(`CREATE INDEX IF NOT EXISTS idx_chapter_content_chapter_lang ON chapter_content(chapter_id, lang);`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_chapter_content_chapter_lang ON chapter_content(book_id, chapter_id, lang);`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_chapters_sort ON chapters(sort_order);`);
+
+    // ─── Multi-book support ───
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS books (
+        id VARCHAR(50) PRIMARY KEY,
+        slug VARCHAR(100) UNIQUE NOT NULL,
+        title_zh VARCHAR(300) NOT NULL,
+        title_en VARCHAR(300) NOT NULL,
+        author_zh VARCHAR(200),
+        author_en VARCHAR(200),
+        is_published BOOLEAN DEFAULT false,
+        sort_order INTEGER DEFAULT 0,
+        cover_verse_zh TEXT,
+        cover_verse_en TEXT,
+        cover_verse_ref VARCHAR(100),
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+    // Ensure default book exists
+    await client.query(`
+      INSERT INTO books (id, slug, title_zh, title_en, author_zh, author_en, is_published, sort_order)
+      VALUES ('fake-god', 'fake-god', '原来我们都在侍奉假神', 'Are We Serving a Fake God?', '颜志鸿', 'Gan Zhi Hong', true, 0)
+      ON CONFLICT (id) DO NOTHING
+    `);
+    // Ensure book_id column exists on chapters + chapter_content
+    const chBookId = await client.query("SELECT column_name FROM information_schema.columns WHERE table_name='chapters' AND column_name='book_id'");
+    if (chBookId.rows.length === 0) {
+      await client.query('ALTER TABLE chapters ADD COLUMN book_id VARCHAR(50)');
+      await client.query("UPDATE chapters SET book_id = 'fake-god' WHERE book_id IS NULL");
+      await client.query('ALTER TABLE chapters ALTER COLUMN book_id SET NOT NULL');
+    }
+    const ccBookId = await client.query("SELECT column_name FROM information_schema.columns WHERE table_name='chapter_content' AND column_name='book_id'");
+    if (ccBookId.rows.length === 0) {
+      await client.query('ALTER TABLE chapter_content ADD COLUMN book_id VARCHAR(50)');
+      await client.query("UPDATE chapter_content SET book_id = 'fake-god' WHERE book_id IS NULL");
+      await client.query('ALTER TABLE chapter_content ALTER COLUMN book_id SET NOT NULL');
+    }
     console.log('[DB] all tables ready');
 
     // Load persisted stripe mode
@@ -189,15 +227,88 @@ app.get('/api/checkout-test', async (req, res) => {
   }
 });
 
-// ─── Public: Get table of contents (all chapters with metadata) ──────────────
+// ─── Public: List published books ────────────────────────────────────────────
+app.get('/api/books', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT id, slug, title_zh, title_en, author_zh, author_en, sort_order,
+             cover_verse_zh, cover_verse_en, cover_verse_ref
+      FROM books WHERE is_published = true ORDER BY sort_order
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Public: Get single book metadata ────────────────────────────────────────
+app.get('/api/books/:bookId', async (req, res) => {
+  const { bookId } = req.params;
+  try {
+    const result = await pool.query(`
+      SELECT id, slug, title_zh, title_en, author_zh, author_en, sort_order,
+             cover_verse_zh, cover_verse_en, cover_verse_ref, is_published
+      FROM books WHERE id = $1 OR slug = $1
+    `, [bookId]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Book not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Public: Get table of contents for a book ────────────────────────────────
+app.get('/api/books/:bookId/chapters', async (req, res) => {
+  const lang = req.query.lang || 'zh';
+  const { bookId } = req.params;
+  try {
+    const result = await pool.query(`
+      SELECT c.id, c.sort_order, c.chapter_num, c.part_group, c.page_num,
+             cc.title, cc.subtitle, cc.part_label
+      FROM chapters c
+      LEFT JOIN chapter_content cc ON cc.chapter_id = c.id AND cc.lang = $1 AND cc.book_id = c.book_id
+      WHERE c.book_id = $2
+      ORDER BY c.sort_order
+    `, [lang, bookId]);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Public: Get single chapter content for a book ───────────────────────────
+app.get('/api/books/:bookId/chapters/:id', async (req, res) => {
+  const lang = req.query.lang || 'zh';
+  const { bookId, id } = req.params;
+  try {
+    const result = await pool.query(`
+      SELECT c.id, c.sort_order, c.chapter_num, c.part_group, c.page_num,
+             cc.title, cc.subtitle, cc.part_label, cc.body_html
+      FROM chapters c
+      LEFT JOIN chapter_content cc ON cc.chapter_id = c.id AND cc.lang = $1 AND cc.book_id = c.book_id
+      WHERE c.book_id = $2 AND c.id = $3
+    `, [lang, bookId, id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Chapter not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Backward-compat: old /api/chapters routes delegate to default book ──────
 app.get('/api/chapters', async (req, res) => {
+  req.params.bookId = 'fake-god';
   const lang = req.query.lang || 'zh';
   try {
     const result = await pool.query(`
       SELECT c.id, c.sort_order, c.chapter_num, c.part_group, c.page_num,
              cc.title, cc.subtitle, cc.part_label
       FROM chapters c
-      LEFT JOIN chapter_content cc ON cc.chapter_id = c.id AND cc.lang = $1
+      LEFT JOIN chapter_content cc ON cc.chapter_id = c.id AND cc.lang = $1 AND cc.book_id = c.book_id
+      WHERE c.book_id = 'fake-god'
       ORDER BY c.sort_order
     `, [lang]);
     res.json(result.rows);
@@ -206,7 +317,6 @@ app.get('/api/chapters', async (req, res) => {
   }
 });
 
-// ─── Public: Get single chapter content ──────────────────────────────────────
 app.get('/api/chapters/:id', async (req, res) => {
   const lang = req.query.lang || 'zh';
   const { id } = req.params;
@@ -215,8 +325,8 @@ app.get('/api/chapters/:id', async (req, res) => {
       SELECT c.id, c.sort_order, c.chapter_num, c.part_group, c.page_num,
              cc.title, cc.subtitle, cc.part_label, cc.body_html
       FROM chapters c
-      LEFT JOIN chapter_content cc ON cc.chapter_id = c.id AND cc.lang = $1
-      WHERE c.id = $2
+      LEFT JOIN chapter_content cc ON cc.chapter_id = c.id AND cc.lang = $1 AND cc.book_id = c.book_id
+      WHERE c.book_id = 'fake-god' AND c.id = $2
     `, [lang, id]);
 
     if (result.rows.length === 0) {
@@ -238,8 +348,34 @@ app.get('/api/languages', async (req, res) => {
   }
 });
 
-// ─── Admin: Update chapter content ───────────────────────────────────────────
+// ─── Admin: Update chapter content (book-aware) ──────────────────────────────
+app.put('/api/admin/books/:bookId/chapters/:id', requireAdmin, async (req, res) => {
+  const { bookId, id } = req.params;
+  const { lang, title, subtitle, part_label, body_html } = req.body;
+  if (!lang || !title || !body_html) {
+    return res.status(400).json({ error: 'lang, title, and body_html are required' });
+  }
+  try {
+    const result = await pool.query(`
+      INSERT INTO chapter_content (chapter_id, lang, title, subtitle, part_label, body_html, book_id, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+      ON CONFLICT (book_id, chapter_id, lang) DO UPDATE SET
+        title = EXCLUDED.title,
+        subtitle = EXCLUDED.subtitle,
+        part_label = EXCLUDED.part_label,
+        body_html = EXCLUDED.body_html,
+        updated_at = NOW()
+      RETURNING *
+    `, [id, lang, title, subtitle || '', part_label || '', body_html, bookId]);
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Admin: Backward-compat chapter update (delegates to fake-god) ───────────
 app.put('/api/admin/chapters/:id', requireAdmin, async (req, res) => {
+  req.params.bookId = 'fake-god';
   const { id } = req.params;
   const { lang, title, subtitle, part_label, body_html } = req.body;
   if (!lang || !title || !body_html) {
@@ -247,9 +383,9 @@ app.put('/api/admin/chapters/:id', requireAdmin, async (req, res) => {
   }
   try {
     const result = await pool.query(`
-      INSERT INTO chapter_content (chapter_id, lang, title, subtitle, part_label, body_html, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, NOW())
-      ON CONFLICT (chapter_id, lang) DO UPDATE SET
+      INSERT INTO chapter_content (chapter_id, lang, title, subtitle, part_label, body_html, book_id, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, 'fake-god', NOW())
+      ON CONFLICT (book_id, chapter_id, lang) DO UPDATE SET
         title = EXCLUDED.title,
         subtitle = EXCLUDED.subtitle,
         part_label = EXCLUDED.part_label,
@@ -257,6 +393,41 @@ app.put('/api/admin/chapters/:id', requireAdmin, async (req, res) => {
         updated_at = NOW()
       RETURNING *
     `, [id, lang, title, subtitle || '', part_label || '', body_html]);
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Admin: Create/update book ───────────────────────────────────────────────
+app.post('/api/admin/books', requireAdmin, async (req, res) => {
+  const { id, slug, title_zh, title_en, author_zh, author_en, is_published, sort_order,
+          cover_verse_zh, cover_verse_en, cover_verse_ref } = req.body;
+  if (!id || !slug || !title_zh || !title_en) {
+    return res.status(400).json({ error: 'id, slug, title_zh, title_en are required' });
+  }
+  try {
+    const result = await pool.query(`
+      INSERT INTO books (id, slug, title_zh, title_en, author_zh, author_en, is_published, sort_order,
+                         cover_verse_zh, cover_verse_en, cover_verse_ref)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      ON CONFLICT (id) DO UPDATE SET
+        slug = EXCLUDED.slug,
+        title_zh = EXCLUDED.title_zh,
+        title_en = EXCLUDED.title_en,
+        author_zh = EXCLUDED.author_zh,
+        author_en = EXCLUDED.author_en,
+        is_published = EXCLUDED.is_published,
+        sort_order = EXCLUDED.sort_order,
+        cover_verse_zh = EXCLUDED.cover_verse_zh,
+        cover_verse_en = EXCLUDED.cover_verse_en,
+        cover_verse_ref = EXCLUDED.cover_verse_ref,
+        updated_at = NOW()
+      RETURNING *
+    `, [id, slug, title_zh, title_en, author_zh || null, author_en || null,
+        is_published !== undefined ? is_published : false,
+        sort_order || 0,
+        cover_verse_zh || null, cover_verse_en || null, cover_verse_ref || null]);
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });

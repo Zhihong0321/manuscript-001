@@ -47,6 +47,122 @@
   .view { display: none; min-height: 100dvh; }
   .view.is-active { display: block; }
 
+  /* ──────────────────────────── book store ──────────────────────────── */
+  .store {
+    max-width: 880px; margin: 0 auto;
+    padding: 24px 24px 48px; min-height: 100dvh;
+    display: flex; flex-direction: column;
+  }
+  .store-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid var(--rule);
+  }
+  .store-brand { display: flex; flex-direction: column; gap: 2px; }
+  .store-logo {
+    font-family: var(--font-serif); font-size: 18px; font-weight: 600;
+    letter-spacing: 0.15em; color: var(--ink);
+  }
+  .store-logo-en {
+    font-family: var(--font-latin); font-size: 11px; font-weight: 400;
+    letter-spacing: 0.25em; color: var(--ink-mute); text-transform: uppercase;
+  }
+  .store-intro {
+    text-align: center; padding: 48px 0 32px;
+  }
+  .store-title {
+    font-family: var(--font-serif); font-size: 28px; font-weight: 600;
+    letter-spacing: 0.2em; color: var(--ink); margin: 0;
+  }
+  .store-subtitle {
+    font-family: var(--font-sans); font-size: 13px; font-weight: 300;
+    letter-spacing: 0.15em; color: var(--ink-mute); margin: 8px 0 0;
+  }
+  .store-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px; flex: 1;
+  }
+  .store-loading {
+    text-align: center; color: var(--ink-mute); padding: 2rem;
+    font-size: 14px; letter-spacing: 0.1em;
+  }
+  .book-card {
+    background: linear-gradient(160deg, #1c1915 0%, #2a2318 40%, #1a1710 100%);
+    border: 1px solid #3a342a; border-radius: 12px;
+    padding: 32px 28px; cursor: pointer;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none; color: #e9e2d2;
+  }
+  .book-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  .book-card-eyebrow {
+    font-family: var(--font-sans); font-size: 11px; font-weight: 400;
+    letter-spacing: 0.18em; color: #837a68;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .book-card-eyebrow .dot {
+    width: 3px; height: 3px; border-radius: 50%;
+    background: #5a5345; display: inline-block;
+  }
+  .book-card-title {
+    font-family: var(--font-serif); font-size: 22px; font-weight: 600;
+    letter-spacing: 0.06em; line-height: 1.5; color: #e9e2d2;
+  }
+  .book-card-title .row { display: block; }
+  .book-card-title .accent { color: #c08b6c; }
+  .book-card-rule {
+    width: 40px; height: 1px;
+    background: #c08b6c; opacity: 0.5;
+  }
+  .book-card-subtitle {
+    font-family: var(--font-serif); font-size: 14px; font-weight: 300;
+    letter-spacing: 0.12em; color: #837a68; margin: 0;
+  }
+  .book-card-verse {
+    font-family: var(--font-serif); font-size: 13px; font-weight: 300;
+    line-height: 1.9; color: #c9c0ad;
+    margin: 4px 0;
+  }
+  .book-card-verse .ref {
+    font-family: var(--font-sans); font-size: 11px;
+    letter-spacing: 0.08em; color: #837a68;
+    display: block; margin-bottom: 4px;
+  }
+  .book-card-cta {
+    margin-top: auto; padding-top: 8px;
+    border-top: 1px solid #3a342a;
+    font-family: var(--font-sans); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.2em; color: #c08b6c; text-transform: uppercase;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .book-card-cta .arrow { font-size: 16px; }
+  .store-foot {
+    text-align: center; padding: 32px 0 0;
+    font-family: var(--font-sans); font-size: 11px;
+    letter-spacing: 0.12em; color: var(--ink-mute);
+  }
+  .cover-back-link {
+    font-family: var(--font-sans); font-size: 11px;
+    letter-spacing: 0.15em; color: var(--ink-mute);
+    transition: color 0.2s;
+  }
+  .cover-back-link:hover { color: var(--accent); }
+  .cover-img {
+    display: block; margin: 0 auto 24px;
+    max-width: 260px; max-height: 300px;
+    object-fit: contain; opacity: 0.9;
+    filter: sepia(0.1);
+  }
+  .book-card-img {
+    display: block; margin: 0 auto 20px;
+    max-width: 240px; max-height: 280px;
+    width: 100%; object-fit: contain; opacity: 0.9;
+    filter: sepia(0.1);
+  }
+
   /* ───────────────────────── top nav (in reader) ─────────────────────── */
   .topbar {
     position: sticky; top: 0; z-index: 30;

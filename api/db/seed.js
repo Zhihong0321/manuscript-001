@@ -14,6 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const { Pool } = require('pg');
 
+const BOOK_ID = process.env.BOOK_ID || 'fake-god';
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:WZnCkFsqaiMpYjliaJcJzBLelEplpZJA@shinkansen.proxy.rlwy.net:24032/railway';
 
 const pool = new Pool({
@@ -98,46 +99,42 @@ const contentMeta = {
 
 /**
  * Extract innerHTML from <div id="content-{id}">...</div> blocks in the HTML file.
+ * Handles cases where attributes may be on separate lines.
  * Returns a map: { 'preface': '<p>...</p>', 'en-preface': '<p>...</p>', ... }
  */
 function extractContentBlocks(html) {
   const blocks = {};
-  // Match <div id="content-XXXX"> ... </div> (greedy within reason)
-  // We use a state machine approach since regex can't handle nested divs reliably
+  // Normalize: collapse whitespace between < and id= so multi-line tags become single-line
+  const normalized = html.replace(/<div\s+id=/g, '<div id=');
   const marker = '<div id="content-';
   let pos = 0;
 
   while (true) {
-    const start = html.indexOf(marker, pos);
+    const start = normalized.indexOf(marker, pos);
     if (start === -1) break;
 
-    // Extract the ID
     const idStart = start + marker.length;
-    const idEnd = html.indexOf('"', idStart);
-    const id = html.substring(idStart, idEnd);
+    const idEnd = normalized.indexOf('"', idStart);
+    const id = normalized.substring(idStart, idEnd);
 
-    // Find the closing tag by counting div depth
-    const contentStart = html.indexOf('>', idEnd) + 1;
+    const contentStart = normalized.indexOf('>', idEnd) + 1;
     let depth = 1;
     let i = contentStart;
-    while (i < html.length && depth > 0) {
-      const nextOpen = html.indexOf('<div', i);
-      const nextClose = html.indexOf('</div>', i);
-
+    while (i < normalized.length && depth > 0) {
+      const nextOpen = normalized.indexOf('<div', i);
+      const nextClose = normalized.indexOf('</div>', i);
       if (nextClose === -1) break;
-
       if (nextOpen !== -1 && nextOpen < nextClose) {
         depth++;
         i = nextOpen + 4;
       } else {
         depth--;
         if (depth === 0) {
-          blocks[id] = html.substring(contentStart, nextClose).trim();
+          blocks[id] = normalized.substring(contentStart, nextClose).trim();
         }
         i = nextClose + 6;
       }
     }
-
     pos = i;
   }
 
@@ -171,18 +168,18 @@ async function seed() {
   try {
     await client.query('BEGIN');
 
-    // Clear existing data
-    await client.query('DELETE FROM chapter_content');
-    await client.query('DELETE FROM chapters');
+    // Clear existing data for this book only
+    await client.query('DELETE FROM chapter_content WHERE book_id = $1', [BOOK_ID]);
+    await client.query('DELETE FROM chapters WHERE book_id = $1', [BOOK_ID]);
 
     // Insert chapters metadata
     for (const ch of chaptersMeta) {
       await client.query(
-        'INSERT INTO chapters (id, sort_order, chapter_num, part_group, page_num) VALUES ($1, $2, $3, $4, $5)',
-        [ch.id, ch.sort_order, ch.chapter_num, ch.part_group, ch.page_num]
+        'INSERT INTO chapters (id, sort_order, chapter_num, part_group, page_num, book_id) VALUES ($1, $2, $3, $4, $5, $6)',
+        [ch.id, ch.sort_order, ch.chapter_num, ch.part_group, ch.page_num, BOOK_ID]
       );
     }
-    console.log(`[SEED] Inserted ${chaptersMeta.length} chapters`);
+    console.log(`[SEED] Inserted ${chaptersMeta.length} chapters for book: ${BOOK_ID}`);
 
     // Insert content for each language
     let contentCount = 0;
@@ -192,9 +189,9 @@ async function seed() {
       const zhBody = blocks[ch.id] || '<p class="placeholder">内容编排中。</p>';
       
       await client.query(
-        `INSERT INTO chapter_content (chapter_id, lang, title, subtitle, part_label, body_html) 
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [ch.id, 'zh', zhMeta.title, zhMeta.subtitle, zhMeta.part_label, zhBody]
+        `INSERT INTO chapter_content (chapter_id, lang, title, subtitle, part_label, body_html, book_id) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [ch.id, 'zh', zhMeta.title, zhMeta.subtitle, zhMeta.part_label, zhBody, BOOK_ID]
       );
       contentCount++;
 
@@ -203,9 +200,9 @@ async function seed() {
       const enBody = blocks['en-' + ch.id] || '<p class="placeholder">Content in progress.</p>';
       
       await client.query(
-        `INSERT INTO chapter_content (chapter_id, lang, title, subtitle, part_label, body_html) 
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [ch.id, 'en', enMeta.title, enMeta.subtitle, enMeta.part_label, enBody]
+        `INSERT INTO chapter_content (chapter_id, lang, title, subtitle, part_label, body_html, book_id) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [ch.id, 'en', enMeta.title, enMeta.subtitle, enMeta.part_label, enBody, BOOK_ID]
       );
       contentCount++;
     }

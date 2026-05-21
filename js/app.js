@@ -1,13 +1,22 @@
 ﻿(() => {
   /* ───── state ───── */
+  let currentBook = detectBookId(); // book slug from URL or default
+  let bookMeta = null; // loaded from /api/books/:id
   let currentLang = localStorage.getItem('ebook-lang') || 'zh';
   let chapters = []; // loaded from API
   let currentChapterIdx = 0;
-  let chapterCache = {}; // cache fetched content: { 'zh:ch1': {...}, ... }
+  let chapterCache = {}; // cache fetched content: { 'fake-god:zh:ch1': {...}, ... }
+
+  function detectBookId() {
+    const m = window.location.pathname.match(/^\/books\/([^/]+)/);
+    return m ? m[1] : null; // null = store view
+  }
 
   /* ───── i18n (UI strings only — no book content here anymore) ───── */
   const i18n = {
     zh: {
+      storeTitle: '书　房', storeSubtitle: '著作与灵修读物',
+      storeOpen: '翻 开', storeLoading: '加载中…',
       openBook: '翻 开 此 书', viewToc: '查 看 目 录', tocLabel: 'CONTENTS',
       tocTitle: '目　　录', prevChapter: '← 上 一 章', nextChapter: '下 一 章 →',
       signoff: '章 · 终', settingsTitle: '阅 读 设 置', fontSize: '字 号',
@@ -28,6 +37,8 @@
       loading: '加载中…',
     },
     en: {
+      storeTitle: 'Library', storeSubtitle: 'Works & Devotional Reads',
+      storeOpen: 'OPEN', storeLoading: 'Loading…',
       openBook: 'OPEN BOOK', viewToc: 'TABLE OF CONTENTS', tocLabel: 'CONTENTS',
       tocTitle: 'Contents', prevChapter: '← PREV', nextChapter: 'NEXT →',
       signoff: '— END —', settingsTitle: 'READING SETTINGS', fontSize: 'Size',
@@ -55,16 +66,24 @@
   /* ───── API helpers ───── */
   const API_BASE = '/api';
 
+  async function fetchBookMeta() {
+    try {
+      const res = await fetch(`${API_BASE}/books/${currentBook}`);
+      if (res.ok) return res.json();
+    } catch (e) { /* fallback to defaults */ }
+    return null;
+  }
+
   async function fetchChaptersList() {
-    const res = await fetch(`${API_BASE}/chapters?lang=${currentLang}`);
+    const res = await fetch(`${API_BASE}/books/${currentBook}/chapters?lang=${currentLang}`);
     if (!res.ok) throw new Error('Failed to load chapters');
     return res.json();
   }
 
   async function fetchChapterContent(chapterId) {
-    const cacheKey = `${currentLang}:${chapterId}`;
+    const cacheKey = `${currentBook}:${currentLang}:${chapterId}`;
     if (chapterCache[cacheKey]) return chapterCache[cacheKey];
-    const res = await fetch(`${API_BASE}/chapters/${chapterId}?lang=${currentLang}`);
+    const res = await fetch(`${API_BASE}/books/${currentBook}/chapters/${chapterId}?lang=${currentLang}`);
     if (!res.ok) throw new Error('Failed to load chapter');
     const data = await res.json();
     chapterCache[cacheKey] = data;
@@ -73,6 +92,7 @@
 
   /* ───── DOM refs ───── */
   const views = {
+    store: document.getElementById('view-store'),
     cover: document.getElementById('view-cover'),
     toc: document.getElementById('view-toc'),
     reader: document.getElementById('view-reader'),
@@ -85,6 +105,11 @@
   function go(name, chapterId) {
     if (name === 'reader') {
       loadChapter(chapterId || chapters[currentChapterIdx]?.id || 'preface');
+    }
+    if (name === 'store') {
+      // Navigate to root (store)
+      window.location.href = '/';
+      return;
     }
     Object.entries(views).forEach(([k, el]) => el.classList.toggle('is-active', k === name));
     document.body.dataset.current = name;
@@ -257,6 +282,9 @@
 
   /* ───── UI language update ───── */
   function updateUILanguage() {
+    const coverBackLink = document.querySelector('.cover-back-link');
+    if (coverBackLink) coverBackLink.textContent = currentLang === 'en' ? '← Library' : '← 书房';
+
     const coverOpen = document.querySelector('.cover-open span:first-child');
     const coverToc = document.querySelector('.cover-toc-link');
     if (coverOpen) coverOpen.textContent = t('openBook');
@@ -545,9 +573,113 @@
     });
   }
 
-  /* ───── Init: load chapters from API then render ───── */
+  /* ───── Init: store view or book view ───── */
   async function init() {
+    if (currentBook === null) {
+      // Root URL → store view
+      await initStore();
+    } else {
+      // /books/:slug/ → book reader
+      await initBook();
+    }
+  }
+
+  async function initStore() {
+    // Show store view
+    Object.entries(views).forEach(([k, el]) => el.classList.toggle('is-active', k === 'store'));
+    document.body.dataset.current = 'store';
+
+    // Store language swap
+    const storeLangSwap = document.getElementById('storeLangSwap');
+    if (storeLangSwap) {
+      storeLangSwap.addEventListener('click', () => {
+        currentLang = currentLang === 'zh' ? 'en' : 'zh';
+        localStorage.setItem('ebook-lang', currentLang);
+        updateStoreLangSwap(storeLangSwap);
+        renderStore();
+      });
+      updateStoreLangSwap(storeLangSwap);
+    }
+
+    renderStore();
+  }
+
+  function updateStoreLangSwap(btn) {
+    if (!btn) return;
+    btn.querySelector('.lang-zh').dataset.active = currentLang === 'zh' ? 'true' : 'false';
+    btn.querySelector('.lang-en').dataset.active = currentLang === 'en' ? 'true' : 'false';
+  }
+
+  let storeBooks = [];
+  async function renderStore() {
+    const grid = document.getElementById('storeGrid');
+    const title = document.getElementById('storeTitle');
+    const subtitle = document.getElementById('storeSubtitle');
+    if (title) title.textContent = t('storeTitle');
+    if (subtitle) subtitle.textContent = t('storeSubtitle');
+
     try {
+      if (!storeBooks.length) {
+        const res = await fetch(`${API_BASE}/books`);
+        if (res.ok) storeBooks = await res.json();
+      }
+
+      if (!storeBooks.length) {
+        grid.innerHTML = `<p class="store-loading">${t('storeLoading')}</p>`;
+        return;
+      }
+
+      grid.innerHTML = storeBooks.map(book => {
+        const isZh = currentLang === 'zh';
+        const bookTitle = isZh ? book.title_zh : book.title_en;
+        const bookAuthor = isZh ? book.author_zh : book.author_en;
+        const verse = isZh ? book.cover_verse_zh : book.cover_verse_en;
+        const verseRef = book.cover_verse_ref || '';
+        const titleRows = splitTitle(bookTitle);
+        const coverImg = book.id === 'fake-god' ? '/image/golden_calf.png' : '';
+        return `
+          <a class="book-card" href="/books/${book.slug}/">
+            ${coverImg ? `<img class="book-card-img" src="${coverImg}" alt="" />` : ''}
+            <div class="book-card-eyebrow">
+              <span>${isZh ? '写给教牧' : 'For pastors'}</span>
+              <span class="dot"></span>
+              <span>${isZh ? '传道人' : 'preachers'}</span>
+              <span class="dot"></span>
+              <span>${isZh ? '教会领袖' : 'church leaders'}</span>
+            </div>
+            <div class="book-card-title">
+              <span class="row">${titleRows[0]}</span>
+              <span class="row">${titleRows[1]}</span>
+              <span class="row">${titleRows[2]}</span>
+            </div>
+            <div class="book-card-rule"></div>
+            <p class="book-card-subtitle">${isZh ? '一面镜子' : 'A Mirror'}</p>
+            <blockquote class="book-card-verse">
+              ${verseRef ? `<span class="ref">— ${verseRef}</span>` : ''}${verse || ''}
+            </blockquote>
+            <div class="book-card-cta">
+              <span>${t('storeOpen')}</span>
+              <span class="arrow">→</span>
+            </div>
+          </a>
+        `;
+      }).join('');
+    } catch (err) {
+      console.error('[STORE]', err);
+      grid.innerHTML = `<p class="store-loading">${t('storeLoading')}</p>`;
+    }
+  }
+
+  async function initBook() {
+    // Show cover, hide store
+    Object.entries(views).forEach(([k, el]) => el.classList.toggle('is-active', k === 'cover'));
+    document.body.dataset.current = 'cover';
+
+    try {
+      // Load book metadata
+      bookMeta = await fetchBookMeta();
+      if (bookMeta) applyBookMeta(bookMeta);
+
       chapters = await fetchChaptersList();
       renderToc();
       updateUILanguage();
@@ -568,6 +700,69 @@
       const tocBody = document.querySelector('#view-toc .toc-body');
       if (tocBody) tocBody.innerHTML = '<p style="padding:2rem;color:var(--accent);">无法加载内容。请稍后再试。</p>';
     }
+  }
+
+  /* ───── Apply book metadata to cover ───── */
+  function applyBookMeta(meta) {
+    // Override i18n cover strings with DB data
+    if (meta.title_zh) i18n.zh.coverTitle = splitTitle(meta.title_zh);
+    if (meta.title_en) i18n.en.coverTitle = splitTitle(meta.title_en);
+    if (meta.author_zh) i18n.zh.coverAuthor = meta.author_zh;
+    if (meta.author_en) i18n.en.coverAuthor = meta.author_en;
+    if (meta.cover_verse_zh) i18n.zh.coverVerse = meta.cover_verse_zh;
+    if (meta.cover_verse_en) i18n.en.coverVerse = meta.cover_verse_en;
+    if (meta.cover_verse_ref) {
+      i18n.zh.coverVerseRef = meta.cover_verse_ref;
+      i18n.en.coverVerseRef = meta.cover_verse_ref;
+    }
+  }
+
+  function splitTitle(title) {
+    // Try to split a title into 3 rows for cover display
+    // Accent key words: 侍奉 (zh) or Serving (en)
+    const isCJK = /[\u4e00-\u9fff]/.test(title);
+
+    let rows;
+    if (isCJK) {
+      // Character-count split for Chinese
+      const len = title.length;
+      if (len <= 6) { rows = [title, '', '']; }
+      else if (len <= 12) {
+        const mid = Math.ceil(len / 2);
+        rows = [title.slice(0, mid), title.slice(mid), ''];
+      } else {
+        const third = Math.ceil(len / 3);
+        rows = [title.slice(0, third), title.slice(third, third * 2), title.slice(third * 2)];
+      }
+    } else {
+      // Word-aware split for English/Latin — never break mid-word
+      const words = title.split(' ');
+      if (words.length <= 2) { rows = [title, '', '']; }
+      else {
+        const n = words.length;
+        const size1 = Math.ceil(n / 3);
+        const size2 = Math.ceil((n - size1) / 2);
+        rows = [
+          words.slice(0, size1).join(' '),
+          words.slice(size1, size1 + size2).join(' '),
+          words.slice(size1 + size2).join(' ')
+        ];
+      }
+    }
+
+    // Accent the key word in whichever row contains it
+    const accentWords = ['侍奉', 'Serving', 'serving'];
+    for (const w of accentWords) {
+      for (let i = 0; i < rows.length; i++) {
+        const idx = rows[i].indexOf(w);
+        if (idx !== -1) {
+          rows[i] = rows[i].slice(0, idx) + '<span class="accent">' + w + '</span>' + rows[i].slice(idx + w.length);
+          break;
+        }
+      }
+      if (rows.some(r => r.includes('class="accent"'))) break;
+    }
+    return rows;
   }
 
   /* ───── Payment receipt & status engine ───── */
